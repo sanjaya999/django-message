@@ -1,0 +1,31 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Django specific
+*.log
+*.pot
+*.pyc
+*.pyo
+*.sqlite3
+
+# Coverage reports
+.coverage
+coverage.xml
+*.cover
+*.egg-info/
+dist/
+build/
+eggs/
+MANIFEST
+
+# Local settings
+settings_local.py  # If you have a local settings file

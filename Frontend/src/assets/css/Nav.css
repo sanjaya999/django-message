@@ -1,0 +1,55 @@
+*{
+    margin: 0px;
+    padding: 0px;
+  }
+  
+  .nav{
+    color:black;
+    background-color: white;
+    width:100% ;
+    box-shadow:  0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 20px;
+    width: calc(100% - 40px);
+    margin: 0 auto;
+
+  }
+  
+  
+  .list{
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding: 10px;
+    margin: 0 ;
+    cursor: pointer;
+  }
+
+  .right-section{
+    display: flex;
+    gap:20px;
+
+  }
+
+  .Login{
+    background-color: #0D47a1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    padding: 10px;
+  }
+
+.Login:hover {
+  background-color: #0B3A8A; /* Darker shade on hover */
+}
+
+@media (max-width: 768px) {
+  .list {
+    flex-direction: column;
+    align-items: center; /* Center items on small screens */
+  }
+}
