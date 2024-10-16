@@ -1,0 +1,35 @@
+/* for register user  */
+
+.containerRegister{ 
+    display: flex;               
+    justify-content: center;     
+    align-items: center;         
+    height: 100vh;              
+}
+.register{
+    display: flex;
+    flex-direction: column;
+    border: solid 1px ;
+    width: 25%;
+    height: 50%;
+}
+
+.register h1{
+    color:blueviolet
+}
+
+.registerForm{
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+
+
+
+
+
+
+
+/*   for login user */

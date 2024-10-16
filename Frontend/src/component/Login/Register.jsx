@@ -19,12 +19,15 @@ function Register(){
         e.preventDefault();
         // API call for register
     }
-    
+
     return(
         <>
+        <div className="containerRegister">
+        <div className="register">
             <h1>Register</h1>
 
-            <form action="" onSubmit={handleSubmit}>
+            <form action="" className="registerForm"
+            onSubmit={handleSubmit}>
                 <input type="text" 
                 name="name"
                 placeholder="fullname" 
@@ -48,7 +51,8 @@ function Register(){
                 
                 <input type="submit" value="Register" />
             </form>
-
+            </div>
+            </div>
         </>
     )
 }

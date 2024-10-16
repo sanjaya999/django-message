@@ -7,6 +7,7 @@ import Nav from './component/Nav';
 
 
 
+
 const Layout = () => {
   return (
     <div>
