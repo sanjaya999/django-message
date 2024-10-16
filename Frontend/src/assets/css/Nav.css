@@ -25,7 +25,14 @@
     padding: 10px;
     margin: 0 ;
     cursor: pointer;
+    text-decoration: none;
   }
+
+  .list a{
+    color: #0D47a1;
+    text-decoration: none;
+  }
+
 
   .right-section{
     display: flex;

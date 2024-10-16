@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 function Nav(){
 
@@ -11,10 +12,10 @@ function Nav(){
             </div>
             <ul className="list right-section">
                 <li>
-                    notification
+                    <NavLink className="navNAV" to="/" >Notification</NavLink>
                 </li>
                 <li>
-                    profile
+                    <NavLink className="navNAV" to="/" >profile</NavLink>
                 </li>
                 <li>
                     <button className="Login">Login</button>
