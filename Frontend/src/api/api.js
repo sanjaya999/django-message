@@ -26,7 +26,7 @@ apiClient.interceptors.request.use(
 export const get = async(endpoint) =>{
     try{
         const response = await apiClient.get(endpoint);
-        return response;
+        return response.data;
     }catch(error){
         console.error('Error fetching data:', error);
         throw error;        
@@ -38,7 +38,7 @@ export const get = async(endpoint) =>{
 export const post = async(endpoint, data)=>{
     try{
         const response = await apiClient.post(endpoint , data);
-        return response;
+        return response.data;
     }catch(error){
         console.error('Error fetching data:', error);
         throw error;
