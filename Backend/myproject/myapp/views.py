@@ -26,7 +26,8 @@ def user_registration(request):
 
     # perform validation
     if not email or not password or not fullname:
-        return Response({"error":"email and password and fullname are required"},status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error":"email and password and fullname are required",
+                         "status" : "400"},status=status.HTTP_400_BAD_REQUEST)
     
     #check if email already exist in database
     if CustomUser.objects.filter(email = email ).exists():
