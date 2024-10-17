@@ -1,6 +1,6 @@
 /* for register user  */
 
-.containerRegister{ 
+.container{ 
     display: flex;               
     justify-content: center;     
     align-items: center;         
@@ -33,3 +33,7 @@
 
 
 /*   for login user */
+.form{
+    display: flex;
+    flex-direction: column;
+}
