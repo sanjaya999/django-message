@@ -1,7 +1,10 @@
 /* for register user  */
-
+*{
+    background-color:#f5f5f5 ;
+}
 .container{ 
-    display: flex;               
+    display: flex;    
+    flex-direction:column ;           
     justify-content: center;     
     align-items: center;         
     height: 100vh;              
@@ -15,7 +18,8 @@
 }
 
 .register h1{
-    color:blueviolet
+    color:blueviolet;
+    text-align: center;
 }
 
 .registerForm{
@@ -23,6 +27,14 @@
     flex-direction: column;
 }
 
+.inner{
+    width: 100%;
+}
+.login-input{
+    height: 5vh;
+    border-bottom: 2px solid blueviolet;
+    width: 99%;
+}
 
 
 
