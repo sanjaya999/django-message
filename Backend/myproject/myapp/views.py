@@ -26,12 +26,13 @@ def user_registration(request):
 
     # perform validation
     if not email or not password or not fullname:
-        return Response({"error":"email and password and fullname are required",
+        return Response({"message":"email and password and fullname are required",
                          "status" : "400"},status=status.HTTP_400_BAD_REQUEST)
     
     #check if email already exist in database
     if CustomUser.objects.filter(email = email ).exists():
-        return Response({"error":"email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message":"email already exists",
+                         "status": "400"}, status=status.HTTP_400_BAD_REQUEST)
     
     #create new user using UserSearilizer
     serializer = UserSerializer(data = data)
