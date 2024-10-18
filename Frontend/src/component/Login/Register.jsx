@@ -4,6 +4,7 @@ import { post } from "../../api/api";
 
 
 function Register(){
+    const [isSuccess, setIsSuccess] = useState(false);
     const[alertMessage , setAlertMessage] = useState("")
     const [data, setData] = useState({
         fullname: "",
@@ -27,14 +28,18 @@ function Register(){
             //display successful alert message
             if (response.status === "201") {
                 setAlertMessage("Registration Successful");
+                setIsSuccess(true)
             }
         } catch (error) {
             //alert on email already exist message
             const errorMessage = error.response.data.message || "";
             if(errorMessage.includes("email already exists")){
                 setAlertMessage("Email already exists");
+                setIsSuccess(false)
             }else {
                 setAlertMessage("Registration Failed");
+                setIsSuccess(false)
+
             }
         }
     };
@@ -42,7 +47,7 @@ function Register(){
         <>
         <div className="container">
         {alertMessage && (
-                <div className="alert">
+        <div className={`alert ${isSuccess ? 'success' : 'error'}`}>
                     {alertMessage}
                 </div>
             )}
@@ -80,7 +85,10 @@ function Register(){
                  onChange={handleChange} required
                  /></div>
                 
-                <input type="submit" value="Register" />
+                <div className="loginB">
+                <input type="submit" 
+                className="loginButton"
+                value="Register" /></div>
                 <h3>Doesnt have an account ? 
         <Link to="/login" className="linkto">Login</Link>
       </h3>
