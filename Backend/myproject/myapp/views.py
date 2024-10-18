@@ -6,6 +6,11 @@ from django.contrib.auth.models import User
 from .serializers import UserSerializer
 from rest_framework import status
 from .models.usermodel import CustomUser
+from rest_framework_simplejwt.tokens import RefreshToken
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 
 # Create your views here.
@@ -43,3 +48,36 @@ def user_registration(request):
                          "status" : "201"},status=status.HTTP_201_CREATED)
     return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
     
+
+#login check
+@api_view(['POST'])
+def login(request):
+    data = request.data
+    email = data.get("email")
+    password = data.get("password")
+
+    logger.info("Login attempt for email: %s %s", email,password)
+    
+
+    # perform validation
+    if not email or not password:
+        return Response({"message" : "email password not found" ,
+                        "status":"400"} , status = status.HTTP_400_BAD_REQUEST)
+    
+    
+    try:
+        user = CustomUser.objects.get(email=email)
+    except CustomUser.DoesNotExist:
+        return Response({"message": "User doesnot exist", "status": "400"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if user.check_password(password):
+        refresh = RefreshToken.for_user(user)
+
+        return Response({"message": "User authenticated successfully", "status": "200",
+                         "refresh_token":str(refresh),
+                         "access_token":str(refresh.access_token)}, status=status.HTTP_200_OK)
+    
+    else:
+        logger.warning("Login attempt failed: Invalid password for email: %s", email)
+
+        return Response({"message": "Invalid email or password", "status": "400"}, status=status.HTTP_400_BAD_REQUEST)
