@@ -59,7 +59,7 @@
 
 .loginB {
     display: flex;
-    width: 50%;
+    width: 100%;
     align-items: center;
     justify-content: center;
 }
@@ -91,15 +91,15 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .success {
-    background-color: #d4edda; /* Light green */
-    color: #155724; /* Darker green text */
-    border: 1px solid #c3e6cb; /* Green border */
+    background-color: #d4edda; 
+    color: #155724; 
+    border: 1px solid #c3e6cb; 
 }
 
 .error {
-    background-color: #f8d7da; /* Light red */
-    color: #721c24; /* Dark red text */
-    border: 1px solid #f5c6cb; /* Red border */
+    background-color: #f8d7da; 
+    color: #721c24; 
+    border: 1px solid #f5c6cb; 
 }
 
 .linkto {
