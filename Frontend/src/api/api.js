@@ -81,41 +81,44 @@ apiClient.interceptors.request.use(
 )
 
 
-export const login = async (email, password) => {
+
+  export const get = async (endpoint) => {
     try {
-      const response = await apiClient.post('/auth/login', { email, password });
-      const { token, refreshToken } = response.data;
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('refreshToken', refreshToken);
+      const response = await apiClient.get(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('GET request error:', error);
+      throw error;
+    }
+  }; 
+  
+  export const post = async (endpoint, data) => {
+    try {
+      const response = await apiClient.post(endpoint, data);
+      return response.data;
+    } catch (error) {
+      console.error('POST request error:', error);
+      throw error;
+    }
+  }; 
+
+  export const del = async (endpoint) => {
+    try {
+      const response = await apiClient.delete(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('DELETE request error:', error);
       throw error;
     }
   };
-
-
-export const logout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    delete apiClient.defaults.headers.common['Authorization'];
-  }
-
-  export const isAuthenticated = () => {
-    const token = localStorage.getItem('authToken');
-    if (!token) return false;
-    
-    try {
-      const decoded = jwtDecode(token);
-      return decoded.exp > Date.now() / 1000;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  export const get = (endpoint) => apiClient.get(endpoint);
-  export const post = (endpoint, data) => apiClient.post(endpoint, data);
-  export const del = (endpoint) => apiClient.delete(endpoint);
-  export const put = (endpoint, data) => apiClient.put(endpoint, data);
   
+export const put = async (endpoint, data) => {
+  try {
+    const response = await apiClient.put(endpoint, data);
+    return response.data;
+  } catch (error) {
+    console.error('PUT request error:', error);
+    throw error;
+  }
+};  
 export {apiClient}
