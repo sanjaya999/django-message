@@ -18,7 +18,9 @@ function Nav(){
                     <NavLink className="navNAV" to="/" >profile</NavLink>
                 </li>
                 <li>
-                    <button className="Login">Login</button>
+                    <button className="Login">
+                        <NavLink  to="/login">Login</NavLink>
+                    </button>
                 </li>
             </ul>
         </header>
