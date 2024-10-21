@@ -4,6 +4,8 @@ import Search from './component/Search';
 import User from './component/User';
 import Message from './component/Message';
 import Nav from './component/Nav';
+import { Outlet } from 'react-router-dom';
+
 
 
 
