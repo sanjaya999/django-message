@@ -1,8 +1,7 @@
-from django.shortcuts import render
+
 from django.http import HttpResponse ,JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view 
 from rest_framework.response import Response
-from django.contrib.auth.models import User
 from .serializers import UserSerializer
 from rest_framework import status
 from django.middleware.csrf import get_token
@@ -103,3 +102,4 @@ def login(request):
         logger.warning("Login attempt failed: Invalid password for email: %s", email)
         return Response({"message": "Invalid email or password", "status": "400"}, 
                         status=status.HTTP_400_BAD_REQUEST)
+    
