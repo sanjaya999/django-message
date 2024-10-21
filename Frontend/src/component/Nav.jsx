@@ -2,8 +2,15 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 function Nav(){
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const handleLogout =()=>{
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('fullname');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('authToken');
+        window.location.href="/login"
 
-
+    }
     return(
         <>
         <header className="nav">
@@ -18,9 +25,15 @@ function Nav(){
                     <NavLink className="navNAV" to="/" >profile</NavLink>
                 </li>
                 <li>
-                    <button className="Login">
-                        <NavLink  to="/login">Login</NavLink>
-                    </button>
+                {isLoggedIn ? (
+                        <NavLink className="navNAV" onClick={handleLogout}>
+                           Logout
+                        </NavLink>
+                    ) : (
+                        <NavLink className="navNAV" to="/login" >
+                            Login
+                        </NavLink>
+                    )}
                 </li>
             </ul>
         </header>

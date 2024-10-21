@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from "react-router-dom";
-import { clearAlertMessage, loginUser } from "../../store/auth/authSlice";
+import { post } from "../../api/api";
 
 function Login() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { loading, error, isAuthenticated, alertMessage } = useSelector(state => state.auth);
-
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
   const [data, setData] = useState({
     email: "",
     password: "",
   });
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard'); // Redirect to dashboard or home page
-    }
-    // Clear alert message when component unmounts
-    return () => dispatch(clearAlertMessage());
-  }, [isAuthenticated, navigate, dispatch]);
-
+  const navigate = useNavigate();
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData({
@@ -29,18 +18,39 @@ function Login() {
     });
   };
 
-  const handleSubmit = async (e) => {
+
+const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser(data));
+try {
+      const response = await post(`/login` ,data)
+      if(response.status === "200"){
+        localStorage.setItem("authToken", response.access_token);
+        localStorage.setItem("fullname", response.user_name);
+        localStorage.setItem("user_id", response.user_id);
+        localStorage.setItem("isLoggedIn", true);
+        window.location.href = '/home';
+      }
+  
+} catch (error) {
+  const errorMessage = error.response.data.message || "";
+  if (errorMessage.includes("Invalid email or password")) {
+    setAlertMessage("Invalid email or password");
+    setIsSuccess(false);
+  } else if(errorMessage.includes("User does not exist")){
+    setAlertMessage("User does not exist");
+    setIsSuccess(false);
+  }
+  
+}    
   };
 
   return (
     <div className="container">
       {alertMessage && (
-        <div className={`alert ${!error ? "success" : "error"}`}>
-          {alertMessage}
-        </div>
-      )}
+          <div className={`alert ${isSuccess ? "success" : "error"}`}>
+            {alertMessage}
+          </div>
+        )}
       <div className="register">
         <h1>Login</h1>
         <form className="registerForm" onSubmit={handleSubmit}>
@@ -68,8 +78,7 @@ function Login() {
             <input 
               type="submit" 
               className="loginButton" 
-              value={loading ? "Logging in..." : "Login"} 
-              disabled={loading}
+              value="Login"
             />
           </div>
           <h3>
