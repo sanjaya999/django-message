@@ -7,5 +7,5 @@ urlpatterns = [
     path('api/test/' , test_view , name="test_view"),
     path("register" , user_registration , name="user_registration"),
     path("login" , login , name="login"),
-    
+
 ]
