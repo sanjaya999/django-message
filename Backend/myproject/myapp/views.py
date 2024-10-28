@@ -107,3 +107,16 @@ def login(request):
         return Response({"message": "Invalid email or password", "status": "400"}, 
                         status=status.HTTP_400_BAD_REQUEST)
     
+
+@api_view(["GET"])
+def search_users(request):
+
+    query = request.GET.get('q' , "")
+
+    if query:
+        users = CustomUser.objects.filter(fullname__icontains= query)
+    else:
+        users = CustomUser.objects.none()
+
+    user_data = [{"id": user.id , "fullName" : user.fullname } for user in users]
+    return Response(user_data)
