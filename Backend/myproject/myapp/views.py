@@ -120,3 +120,4 @@ def search_users(request):
 
     user_data = [{"id": user.id , "fullName" : user.fullname } for user in users]
     return Response(user_data)
+
