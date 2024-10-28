@@ -5,9 +5,11 @@ from rest_framework.response import Response
 from .serializers import UserSerializer
 from rest_framework import status
 from django.middleware.csrf import get_token
-from .models.usermodel import CustomUser
+from .models.usermodel import CustomUser , conversation , Message
 from rest_framework_simplejwt.tokens import RefreshToken
 import logging
+from django.shortcuts import get_object_or_404
+
 
 
 
@@ -121,3 +123,20 @@ def search_users(request):
     user_data = [{"id": user.id , "fullName" : user.fullname } for user in users]
     return Response(user_data)
 
+
+def check_existing_conversation(user1 , user2):
+    return conversation.objects.filter(members = user1).filter(members = user2).first()
+@api_view(['POST'])
+def get_or_create_conversation(request):
+
+    user_id = request.data.get("user_id")
+    user_chat = get_object_or_404(CustomUser , id = user_id)
+    current_user = request.user
+
+    Conversation = check_existing_conversation(current_user , user_chat)
+    if Conversation:
+        return Response({'conversation_id': Conversation.id, 'message': 'Existing conversation found.'})
+    
+    new_conversation = conversation.objects.create(title="" , is_group=False)
+    new_conversation.members.add(current_user , user_chat)
+    return Response({'conversation_id': new_conversation.id, 'message': 'New conversation created.'})
