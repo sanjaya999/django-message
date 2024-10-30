@@ -126,6 +126,8 @@ def search_users(request):
 
 def check_existing_conversation(user1 , user2):
     return conversation.objects.filter(members = user1).filter(members = user2).first()
+
+
 @api_view(['POST'])
 def get_or_create_conversation(request):
 
@@ -140,3 +142,92 @@ def get_or_create_conversation(request):
     new_conversation = conversation.objects.create(title="" , is_group=False)
     new_conversation.members.add(current_user , user_chat)
     return Response({'conversation_id': new_conversation.id, 'message': 'New conversation created.'})
+
+
+@api_view(["POST"])
+def post_message(request):
+    try:
+        # Get and validate inputs
+        conversation_id = request.data.get("conversation_id")
+        content = request.data.get("content")
+        reply_to_id = request.data.get("reply_to_id")   
+
+        if not conversation_id:
+            return Response({
+                'error': 'conversation_id is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not content:
+            return Response({
+                'error': 'Message content is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get conversation and check membership
+        try:
+            chat_conversation = conversation.objects.get(id=conversation_id)
+            if request.user not in chat_conversation.members.all():
+                return Response({
+                    'error': 'You are not a member of this conversation'
+                }, status=status.HTTP_403_FORBIDDEN)
+        except conversation.DoesNotExist:
+            return Response({
+                'error': 'Conversation not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Handle reply_to
+        reply_to = None
+        if reply_to_id:
+            try:
+                reply_to = Message.objects.get(
+                    id=reply_to_id,
+                    Conversation=chat_conversation
+                )
+            except Message.DoesNotExist:
+                return Response({
+                    'error': 'Reply message not found in this conversation'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+        # Create message
+        message = Message.objects.create(
+            Conversation=chat_conversation,
+            sender=request.user,
+            content=content,
+            reply_to=reply_to,
+            is_read=False
+        )
+
+        # Mark as read for sender
+        message.is_read = True
+        message.save()
+
+        # Prepare response data
+        response_data = {
+            'message_id': message.id,
+            'conversation_id': conversation_id,
+            'sender': {
+                'id': request.user.id,
+                'username': request.user.fullname
+            },
+            'content': content,
+            'timestamp': message.timestamp.isoformat(),
+            'is_read': message.is_read
+        }
+
+        # Add reply information if present
+        if reply_to:
+            response_data['reply_to'] = {
+                'id': reply_to.id,
+                'content': reply_to.content,
+                'sender': {
+                    'id': reply_to.sender.id,
+                    'username': reply_to.sender.username
+                },
+                'timestamp': reply_to.timestamp.isoformat()
+            }
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response({
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

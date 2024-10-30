@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import index , test_view  # Import specific view functions
-from .views import user_registration , login ,search_users, get_or_create_conversation
+from .views import user_registration , login ,search_users, get_or_create_conversation,post_message
 
 urlpatterns = [
     path('', index, name='index'),
@@ -9,5 +9,7 @@ urlpatterns = [
     path("login" , login , name="login"),
     path("search" , search_users , name="search_users"),
     path('conversations', get_or_create_conversation, name='get_or_create_conversation'),
+    path('message', post_message, name='post_message'),
+
 
 ]
