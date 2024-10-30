@@ -42,25 +42,33 @@ function Search() {
     };
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    value={searchValue}
-                    onChange={handleChange}
-                    placeholder="Search"
-                    disabled={isLoading}
-                />
-                <button type="submit" disabled={isLoading}>
-                    {isLoading ? "Searching..." : "Submit"}
-                </button>
-            </form>
-            
-            {error && <div style={{ color: "red" }}>{error}</div>}
+        <div className="search-container">
+            <form className="search-form" 
+            onSubmit={handleSubmit}>
+               <div className="search-wrapper">
+                    <input
+                        className="search-input"
+                        type="text"
+                        value={searchValue}
+                        onChange={handleChange}
+                        placeholder="Search users..."
+                        disabled={isLoading}
+                    />
+                    <button 
+                        type="submit" 
+                        className={`search-button ${isLoading ? 'loading' : ''}`}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Searching..." : "Search"}
+                    </button>
+                </div>
+                {error && <div>{error}</div>}
             {results.length > 0 && (
-                <div>
+                <div  className="results-container">
                     {results.map((result) =>(
-                        <div key={result.id}>
+                        <div key={result.id}
+                        className="result-item"
+                        >
                          
                         {result.fullName}
 
@@ -68,6 +76,9 @@ function Search() {
                     ))}
                 </div>
             )}
+            </form>
+            
+
             
         </div>
     );
