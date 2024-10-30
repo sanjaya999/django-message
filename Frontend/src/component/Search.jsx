@@ -28,12 +28,14 @@ function Search() {
             const response = await get(`/search?q=${encodeURIComponent(searchValue.trim())}`);
             
             console.log("Response:", response);
-            
-                setResults(response);
+            setResults(response);
+          
         
         } catch (error) {
-            console.error("Search error:", error);
-            setError(error.message || "An error occurred while searching");
+            const errorMessage = error.response.data.message
+            if(errorMessage.includes("No user found")){
+                setError("No user found")
+            }
         } finally {
             setIsLoading(false);
         }
@@ -55,7 +57,7 @@ function Search() {
             </form>
             
             {error && <div style={{ color: "red" }}>{error}</div>}
-            {results.length > 0 ? (
+            {results.length > 0 && (
                 <div>
                     {results.map((result) =>(
                         <div key={result.id}>
@@ -65,10 +67,6 @@ function Search() {
                         </div>
                     ))}
                 </div>
-            ): (
-                <>
-                error
-                </>
             )}
             
         </div>
