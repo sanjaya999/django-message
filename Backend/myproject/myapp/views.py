@@ -9,6 +9,8 @@ from .models.usermodel import CustomUser , conversation , Message
 from rest_framework_simplejwt.tokens import RefreshToken
 import logging
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
+
 
 
 
@@ -226,6 +228,83 @@ def post_message(request):
             }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response({
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+class MessagePagination(PageNumberPagination):
+    page_size = 50  # Number of messages per page
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+@api_view(['GET'])
+def get_messages(request, conversation_id):
+    try:
+        
+        try:
+            chat_conversation = conversation.objects.get(id=conversation_id)
+            if request.user not in chat_conversation.members.all():
+                return Response({
+                    'error': 'You are not a member of this conversation'
+                }, status=status.HTTP_403_FORBIDDEN)
+        except conversation.DoesNotExist:
+            return Response({
+                'error': 'Conversation not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Get messages with proper ordering
+        messages = Message.objects.filter(
+            Conversation=chat_conversation
+        ).order_by('-timestamp')  # Newest first
+
+        # Setup pagination
+        paginator = MessagePagination()
+        paginated_messages = paginator.paginate_queryset(messages, request)
+
+        # Prepare the response data
+        message_data = []
+        for message in paginated_messages:
+            message_dict = {
+                'id': message.id,
+                'content': message.content,
+                'sender': {
+                    'id': message.sender.id,
+                    'username': message.sender.fullname
+                },
+                'timestamp': message.timestamp.isoformat(),
+                'is_read': message.is_read
+            }
+
+            # Add reply_to information if present
+            if message.reply_to:
+                message_dict['reply_to'] = {
+                    'id': message.reply_to.id,
+                    'content': message.reply_to.content,
+                    'sender': {
+                        'id': message.reply_to.sender.id,
+                        'username': message.reply_to.sender.username
+                    }
+                }
+
+            message_data.append(message_dict)
+
+        # Mark unread messages as read
+        Message.objects.filter(
+            Conversation=chat_conversation,
+            is_read=False
+        ).exclude(
+            sender=request.user
+        ).update(is_read=True)
+
+        response_data = {
+            'conversation_id': conversation_id,
+            'messages': message_data,
+            'total_messages': messages.count(),
+        }
+
+        return paginator.get_paginated_response(response_data)
 
     except Exception as e:
         return Response({
