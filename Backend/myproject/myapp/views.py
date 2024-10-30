@@ -123,6 +123,9 @@ def search_users(request):
         users = CustomUser.objects.none()
 
     user_data = [{"id": user.id , "fullName" : user.fullname } for user in users]
+    if user_data == []:
+        return Response({"message": "No user found", "status": "400"}, 
+                        status=status.HTTP_400_BAD_REQUEST)
     return Response(user_data)
 
 
