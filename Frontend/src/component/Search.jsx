@@ -1,16 +1,78 @@
-import React from "react"
+import React, { useState } from "react";
+import { get } from "../api/api";
 
-function Search(){
+function Search() {
+    const [searchValue, setSearchValue] = useState("");
+    const [results, setResults] = useState([]);
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
+    const handleChange = (e) => {
+        setSearchValue(e.target.value);
+        setError(null);
+    };
 
-    return(
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!searchValue.trim()) {
+            setError("Please enter a search term");
+            return;
+        }
 
-        <>
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            // Direct URL construction for the search query
+            const response = await get(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+            
+            console.log("Response:", response);
+            
+                setResults(response);
+        
+        } catch (error) {
+            console.error("Search error:", error);
+            setError(error.message || "An error occurred while searching");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
         <div>
-            Search
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    value={searchValue}
+                    onChange={handleChange}
+                    placeholder="Search"
+                    disabled={isLoading}
+                />
+                <button type="submit" disabled={isLoading}>
+                    {isLoading ? "Searching..." : "Submit"}
+                </button>
+            </form>
+            
+            {error && <div style={{ color: "red" }}>{error}</div>}
+            {results.length > 0 ? (
+                <div>
+                    {results.map((result) =>(
+                        <div key={result.id}>
+                         
+                        {result.fullName}
+
+                        </div>
+                    ))}
+                </div>
+            ): (
+                <>
+                error
+                </>
+            )}
+            
         </div>
-        </>
-    )
+    );
 }
 
-export default  Search;
+export default Search;
