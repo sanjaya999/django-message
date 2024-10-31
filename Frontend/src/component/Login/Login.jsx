@@ -28,6 +28,7 @@ try {
         localStorage.setItem("fullname", response.user_name);
         localStorage.setItem("user_id", response.user_id);
         localStorage.setItem("isLoggedIn", true);
+        localStorage.setItem("userId" , response.user_id)
         window.location.href = '/home';
       }
   
