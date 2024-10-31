@@ -314,3 +314,52 @@ def get_messages(request, conversation_id):
         return Response({
             'error': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+def get_user_conversations(request):
+    try:
+        # Get all conversations where the current user is a member
+        user_conversations = conversation.objects.filter(members=request.user)
+        
+        conversations_data = []
+        for conv in user_conversations:
+            # Get the other user in the conversation (for non-group chats)
+            other_user = conv.members.exclude(id=request.user.id).first()
+            
+            # Get the last message in this conversation
+            last_message = Message.objects.filter(Conversation=conv).order_by('-timestamp').first()
+            
+            # Get unread message count
+            unread_count = Message.objects.filter(
+                Conversation=conv,
+                is_read=False
+            ).exclude(sender=request.user).count()
+            
+            conversation_data = {
+                'conversation_id': conv.id,
+                'other_user': {
+                    'id': other_user.id,
+                    'fullname': other_user.fullname,
+                } if other_user else None,
+                'last_message': {
+                    'content': last_message.content,
+                    'timestamp': last_message.timestamp.isoformat(),
+                    'sender_id': last_message.sender.id
+                } if last_message else None,
+                'unread_count': unread_count
+            }
+            conversations_data.append(conversation_data)
+        
+        # Sort by last message timestamp
+        conversations_data.sort(
+            key=lambda x: x['last_message']['timestamp'] if x['last_message'] else '',
+            reverse=True
+        )
+        
+        return Response(conversations_data)
+    
+    except Exception as e:
+        return Response({
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
