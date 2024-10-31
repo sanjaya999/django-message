@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { get } from "../api/api";
 
-function Search() {
+function Search({onSelectUser}) {
     const [searchValue, setSearchValue] = useState("");
     const [results, setResults] = useState([]);
     const [error, setError] = useState(null);
@@ -11,7 +11,9 @@ function Search() {
         setSearchValue(e.target.value);
         setError(null);
     };
-
+    const selected = (resultId)=>{
+        onSelectUser(resultId)
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -67,6 +69,7 @@ function Search() {
                 <div  className="results-container">
                     {results.map((result) =>(
                         <div key={result.id}
+                        onClick={()=>selected(result.id)}
                         className="result-item"
                         >
                          
