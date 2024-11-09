@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "channels",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,17 +41,26 @@ INSTALLED_APPS = [
     "myapp",
     "rest_framework",
     "corsheaders",
-    "channels",
     'rest_framework.authtoken',
     'rest_auth',
     'rest_framework_simplejwt'
 ]
 
+ASGI_APPLICATION = 'myproject.asgi.application'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
          'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+}
+
+CHANNEL_LAYERS = {
+    "default" : {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    }
 }
 
 from datetime import timedelta
@@ -195,3 +205,8 @@ LOGGING = {
         },
     },
 }
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1'
+]
