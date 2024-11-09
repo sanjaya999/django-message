@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { get, post } from '../api/api';
+import { convertToRelativeTime } from '../functions/time';
 
 function Message({ conversationId, otherUser }) {
   const messagesEndRef = useRef(null);
@@ -8,10 +9,38 @@ function Message({ conversationId, otherUser }) {
   const [currentConvo, setCurrentConvo] = useState("");
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const socketRef = useRef(null);
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  //initialize socket
+  useEffect(()=>{
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    socketRef.current = new WebSocket(`${wsScheme}://localhost:9000/ws/chat/${conversationId}`);
+
+
+    //listen fro new message
+    socketRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "chat_message") {
+        setMessages((prev) => [...prev, data.message].sort(
+          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+        ));
+        scrollToBottom();
+      }
+    };
+
+    socketRef.current.onclose = () => {
+      console.log("WebSocket connection closed.");
+    };
+
+   return () => {
+      socketRef.current.close();
+    };
+  },[conversationId, currentUser])
 
   useEffect(() => {
     scrollToBottom();
@@ -87,8 +116,12 @@ function Message({ conversationId, otherUser }) {
   };
 
   const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    return convertToRelativeTime(timestamp)
+  };
+
+  const handleInputChange = (e) => {
+    setNewMessage(e.target.value);
   };
 
   return (
@@ -113,9 +146,6 @@ function Message({ conversationId, otherUser }) {
                       {formatTime(message.timestamp)}
                     </div>
                   </div>
-                  {message.is_read && (
-                    <div className="read-status">Read</div>
-                  )}
                 </div>
               </div>
             </div>
@@ -129,7 +159,7 @@ function Message({ conversationId, otherUser }) {
           <input
             type="text"
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Type a message..."
             className="message-input"
           />
