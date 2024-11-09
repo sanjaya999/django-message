@@ -5,6 +5,7 @@ import "./assets/css/Nav.css";
 import "./assets/css/login.css";
 import "./assets/css/User.css";
 import "./assets/css/Search.css";
+import "./assets/css/Message.css"
 import Layout from "./Layout.jsx";
 import Register from "./component/Login/Register.jsx";
 import Login from "./component/Login/Login.jsx";
