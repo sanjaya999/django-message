@@ -19,7 +19,7 @@ function Message({ conversationId, otherUser }) {
   //initialize socket
   useEffect(()=>{
     const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-    socketRef.current = new WebSocket(`${wsScheme}://localhost:9000/ws/chat/${conversationId}`);
+    socketRef.current = new WebSocket(`${wsScheme}://127.0.0.1:9000/ws/chat/${conversationId}`);
 
 
     //listen fro new message
