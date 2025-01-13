@@ -1,7 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from .models import Message, conversation , CustomUser
+from .models import Message, conversation as Conversation , CustomUser
 from django.contrib.auth.models import User
 from asgiref.sync import sync_to_async
 
@@ -105,11 +105,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Save message to database"""
         try:
             user = CustomUser.objects.get(id=user_id)
-            conversation = Conversation.objects.get(id=self.conversation_id)
+            conv = Conversation.objects.get(id=self.conversation_id)
             return Message.objects.create(
                 sender=user,
-                conversation=conversation,
+                Conversation=conv,  # Changed from 'conversation' to 'Conversation' to match model
                 content=message_content
             )
         except (CustomUser.DoesNotExist, Conversation.DoesNotExist) as e:
+            print(f"Error saving message: {str(e)}")
             raise ValueError(f"Database error: {str(e)}")

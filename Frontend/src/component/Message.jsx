@@ -17,30 +17,40 @@ function Message({ conversationId, otherUser }) {
   };
 
   //initialize socket
-  useEffect(()=>{
+  useEffect(() => {
     const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
     socketRef.current = new WebSocket(`${wsScheme}://127.0.0.1:9000/ws/chat/${conversationId}`);
 
+    // Add connection handling
+    socketRef.current.onopen = () => {
+        console.log("WebSocket connected successfully");
+    };
 
-    //listen fro new message
+    socketRef.current.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+
     socketRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "chat_message") {
-        setMessages((prev) => [...prev, data.message].sort(
-          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-        ));
-        scrollToBottom();
-      }
+        const data = JSON.parse(event.data);
+        console.log("Received message:", data); // Debug incoming messages
+        if (data.type === "chat_message") {
+            setMessages((prev) => [...prev, data.message].sort(
+                (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+            ));
+            scrollToBottom();
+        }
     };
 
     socketRef.current.onclose = () => {
-      console.log("WebSocket connection closed.");
+        console.log("WebSocket connection closed.");
     };
 
-   return () => {
-      socketRef.current.close();
+    return () => {
+        if (socketRef.current) {
+            socketRef.current.close();
+        }
     };
-  },[conversationId, currentUser])
+}, [conversationId, currentUser]);
 
   useEffect(() => {
     scrollToBottom();
@@ -92,28 +102,26 @@ function Message({ conversationId, otherUser }) {
     }
   }, [conversationId]);
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
     try {
-      const response = await post(`/message`, {
-        conversation_id: conversationId,
-        content: newMessage,
-      });
-
-      if (response.success) {
-        // Add new message and sort to maintain order
-        setMessages(prev => [...prev, response.message].sort(
-          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-        ));
-        setNewMessage('');
-        scrollToBottom();
-      }
+        if (socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({
+                type: 'chat_message',
+                message: newMessage,
+                user_id: currentUser
+            }));
+            setNewMessage('');
+        } else {
+            console.error("WebSocket is not connected");
+            // Optionally retry connection or show error to user
+        }
     } catch (error) {
-      console.error('Error sending message:', error);
+        console.error("Error sending message:", error);
     }
-  };
+};
 
   const formatTime = (timestamp) => {
     
@@ -136,9 +144,7 @@ function Message({ conversationId, otherUser }) {
               className={`message-wrapper ${isCurrentUser ? 'message-wrapper-right' : 'message-wrapper-left'}`}
             >
               <div className={`message-content ${isCurrentUser ? 'message-content-reverse' : ''}`}>
-                <div className="avatar">
-                  {message.sender.username[0].toUpperCase()}
-                </div>
+               
                 <div>
                   <div className={`message-bubble ${isCurrentUser ? 'message-bubble-right' : 'message-bubble-left'}`}>
                     <p>{message.content}</p>
