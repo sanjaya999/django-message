@@ -4,19 +4,20 @@ import Search from './component/Search';
 import User from './component/User';
 import Message from './component/Message';
 import Nav from './component/Nav';
-import { Outlet } from 'react-router-dom';
 
 
 
 
 
 const Layout = () => {
-  const[selectedUser , setSelectedUser] = useState("")
-  const [selectConv , setselectConv] = useState("")
-  const [messageUser , setmessageUser] = useState("")
+  const[selectedUser , setSelectedUser] = useState(null)
+  const [selectConv , setselectConv] = useState(null)
+  const [messageUser , setmessageUser] = useState(null)
 
   const handleUserSelect = (userId) =>{
     setSelectedUser(userId)
+    setmessageUser(null);
+    setselectConv(null);
   }
 
   const handleConvo = (conversationId)=>{
@@ -37,10 +38,14 @@ const Layout = () => {
           onSideSelect={MessageUserSelect}/>
         </div>
 
+      {selectConv && messageUser && (
         <div className="messageArea">
-          <Message conversationId={selectConv}
-          otherUser={messageUser} />
-        </div>
+        <Message
+         conversationId={selectConv}
+         otherUser={messageUser} />
+      </div>
+      )}
+        
       </div>
     </div>
   );
