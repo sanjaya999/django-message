@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 function Nav(){
+    const currentuser = localStorage.getItem("fullname")
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const handleLogout =()=>{
         localStorage.removeItem('isLoggedIn');
@@ -23,6 +24,9 @@ function Nav(){
                 </li>
                 <li>
                     <NavLink className="navNAV" to="/" >profile</NavLink>
+                </li>
+                <li>
+                    {currentuser}
                 </li>
                 <li>
                 {isLoggedIn ? (
