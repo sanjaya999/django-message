@@ -3,10 +3,13 @@ import { get, post } from '../api/api';
 import { convertToRelativeTime } from '../functions/time';
 
 function Message({ conversationId, otherUser }) {
+  console.log("other user " , otherUser);
+  console.log("conversation id" , conversationId);
+  
+  
   const messagesEndRef = useRef(null);
   const currentUser = localStorage.getItem("user_id");
-  const [convoFound, setConvoFound] = useState(null);
-  const [currentConvo, setCurrentConvo] = useState("");
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const socketRef = useRef(null);
@@ -56,30 +59,8 @@ function Message({ conversationId, otherUser }) {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    const get_create_convo = async () => {
-      try {
-        const response = await post('/conversations', {
-          user_id: currentUser,
-          user: otherUser
-        });
-        
-        if (response.message?.includes("Existing conversation found.")) {
-          setConvoFound(true);
-          // Sort messages by timestamp when receiving them
-          const sortedMessages = response.messages?.sort(
-            (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-          ) || [];
-          setMessages(sortedMessages);
-        } else {
-          setCurrentConvo(response.conversation_id);
-        }
-      } catch (error) {
-        console.error('Error initializing conversation:', error);
-      }
-    };
-    get_create_convo();
-  }, [conversationId, currentUser, otherUser]);
+  
+
 
   useEffect(() => {
     const fetchMessages = async () => {
