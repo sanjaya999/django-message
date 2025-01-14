@@ -3,10 +3,11 @@ import { get, post } from '../api/api';
 import { convertToRelativeTime } from '../functions/time';
 
 function Message({ conversationId, otherUser }) {
-  console.log("other user " , otherUser);
-  console.log("conversation id" , conversationId);
-  
-  
+  console.log("Message component - Render with:", {
+    conversationId,
+    otherUser
+});
+
   const messagesEndRef = useRef(null);
   const currentUser = localStorage.getItem("user_id");
 
@@ -112,7 +113,11 @@ const handleSubmit = async (e) => {
   const handleInputChange = (e) => {
     setNewMessage(e.target.value);
   };
-
+  if (!conversationId || !otherUser) {
+    console.log("Missing data for Message component:", { conversationId, otherUser });
+    return <p>Please select a user to start a conversation.</p>;
+  }
+  
   return (
     <div className="chat-container">
       <div className="messages-container">
