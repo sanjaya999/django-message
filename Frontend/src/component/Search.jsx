@@ -11,7 +11,9 @@ function Search({onSelectUser}) {
         setSearchValue(e.target.value);
         setError(null);
     };
+    
     const selected = (resultId)=>{
+        console.log("user clicked" , resultId)
         onSelectUser(resultId)
     }
     const handleSubmit = async (e) => {
