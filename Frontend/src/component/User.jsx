@@ -1,13 +1,65 @@
 import React, { useEffect, useState } from "react"
-import { get } from "../api/api"
+import { get ,post  } from "../api/api"
 import { convertToRelativeTime } from "../functions/time"
 
+
 function User ({userId ,  onSelectConvo ,onSideSelect}){
+    const currentUser = localStorage.getItem("user_id");
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [conversation , setconversation] = useState([])
+    const [convoFound, setConvoFound] = useState(null);
+    const [currentConvo, setCurrentConvo] = useState("");
     
+    useEffect(() => {
+        setCurrentConvo("");
+        setConvoFound(null);
+    }, [userId]);
+
+        useEffect(() => {
+            console.log("searched and clicked " , userId);
     
+            const get_create_convo = async () => {
+                if (!userId) return; // Exit early if no userId
+              try {
+                const response = await post('/conversations', {
+                  user_id: currentUser,
+                  user: userId
+                });
+                
+                if (response.message?.includes("Existing conversation found.")) {
+                  setConvoFound(true);
+                  console.log("conversation found after fetch" , response)
+                  setCurrentConvo(response.conversation_id);
+
+                  onSelectConvo(response.conversation_id);
+                  onSideSelect(userId); 
+
+                  // Sort messages by timestamp when receiving them
+                 
+                } else {
+                  console.log("conversation created" , response)
+                  if (response.conversation_id) {
+                    onSelectConvo(response.conversation_id);
+                    onSideSelect(userId);
+                }
+                }
+                getconversation();
+
+              } catch (error) {
+                console.error('Error initializing conversation:', error);
+              }
+            };
+
+            if (userId) {  // Only run if userId is present
+                get_create_convo();
+            }
+          }, [ currentUser, userId]);
+    
+
+
+
     useEffect(()=>{
         getconversation();
     },[userId])
