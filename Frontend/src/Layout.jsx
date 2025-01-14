@@ -14,11 +14,17 @@ const Layout = () => {
   const [selectConv , setselectConv] = useState(null)
   const [messageUser , setmessageUser] = useState(null)
 
-  const handleUserSelect = (userId) =>{
-    setSelectedUser(userId)
-    setmessageUser(null);
-    setselectConv(null);
-  }
+  const handleUserSelect = (userId) => {
+    console.log("Layout: New user selected:", userId);
+    setSelectedUser(userId);
+  
+    // Only reset states if selecting a different user
+    if (userId !== selectedUser) {
+      setmessageUser(null);
+      setselectConv(null);
+    }
+  };
+  
 
   const handleConvo = (conversationId)=>{
     setselectConv(conversationId)
@@ -41,6 +47,7 @@ const Layout = () => {
       {selectConv && messageUser && (
         <div className="messageArea">
         <Message
+         key={`${selectConv}-${messageUser}`}
          conversationId={selectConv}
          otherUser={messageUser} />
       </div>
