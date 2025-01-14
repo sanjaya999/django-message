@@ -12,10 +12,13 @@ function Search({onSelectUser}) {
         setError(null);
     };
     
-    const selected = (resultId)=>{
-        console.log("user clicked" , resultId)
-        onSelectUser(resultId)
-    }
+    const selected = (resultId) => {
+        if (resultId) {
+          console.log("Search component - user clicked", resultId);
+          onSelectUser(resultId);
+        }
+      };
+      
     const handleSubmit = async (e) => {
         e.preventDefault();
         
