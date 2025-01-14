@@ -5,6 +5,7 @@ import { convertToRelativeTime } from "../functions/time"
 
 function User ({userId ,  onSelectConvo ,onSideSelect}){
     const currentUser = localStorage.getItem("user_id");
+    console.log("search selected id in userjsx" , userId);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -12,50 +13,33 @@ function User ({userId ,  onSelectConvo ,onSideSelect}){
     const [convoFound, setConvoFound] = useState(null);
     const [currentConvo, setCurrentConvo] = useState("");
     
-    useEffect(() => {
-        setCurrentConvo("");
-        setConvoFound(null);
-    }, [userId]);
 
-        useEffect(() => {
-            console.log("searched and clicked " , userId);
-    
-            const get_create_convo = async () => {
-                if (!userId) return; // Exit early if no userId
-              try {
-                const response = await post('/conversations', {
-                  user_id: currentUser,
-                  user: userId
-                });
-                
-                if (response.message?.includes("Existing conversation found.")) {
-                  setConvoFound(true);
-                  console.log("conversation found after fetch" , response)
-                  setCurrentConvo(response.conversation_id);
 
-                  onSelectConvo(response.conversation_id);
-                  onSideSelect(userId); 
-
-                  // Sort messages by timestamp when receiving them
-                 
-                } else {
-                  console.log("conversation created" , response)
-                  if (response.conversation_id) {
-                    onSelectConvo(response.conversation_id);
-                    onSideSelect(userId);
-                }
-                }
-                getconversation();
-
-              } catch (error) {
-                console.error('Error initializing conversation:', error);
-              }
-            };
-
-            if (userId) {  // Only run if userId is present
-                get_create_convo();
-            }
-          }, [ currentUser, userId]);
+    const get_create_convo = async () => {
+        if (!userId) return; // Exit early if no userId
+        try {
+          onSelectConvo(null); // Reset conversation ID
+          onSideSelect(null);  // Reset other user
+      
+          const response = await post('/conversations', { user_id: currentUser, user: userId });
+          console.log("Conversation API response:", response);
+      
+          if (response.conversation_id) {
+            setCurrentConvo(response.conversation_id);
+            onSelectConvo(response.conversation_id); // Set conversation ID
+            onSideSelect(userId);                   // Set other user ID
+          } else {
+            console.error("Failed to create or fetch conversation:", response);
+          }
+        } catch (error) {
+          console.error('Error initializing conversation:', error);
+        }
+      };
+      
+      useEffect(() => {
+        if (userId) get_create_convo();
+      }, [userId]);
+      
     
 
 
@@ -69,6 +53,7 @@ function User ({userId ,  onSelectConvo ,onSideSelect}){
         try {
             const response = await get(`get-user-conversations`)
             if(Array.isArray(response)){
+                console.log("current message" , response)
                 setconversation(response)
             }else{
                 setconversation([])
@@ -85,6 +70,8 @@ function User ({userId ,  onSelectConvo ,onSideSelect}){
 
     const selectConvo = (conversationId , otherUserId)=>{
         onSelectConvo(conversationId)
+        console.log("other user in userjsx", otherUserId);
+        
         onSideSelect(otherUserId)
     }
 
