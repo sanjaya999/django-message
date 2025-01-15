@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { get } from "../api/api";
+import { useDispatch } from "react-redux";
+import { setSelectedUser } from "../features/layoutSlice";
 
-function Search({onSelectUser}) {
+
+function Search() {
     const [searchValue, setSearchValue] = useState("");
     const [results, setResults] = useState([]);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useDispatch();
 
     const handleChange = (e) => {
         setSearchValue(e.target.value);
@@ -15,7 +19,7 @@ function Search({onSelectUser}) {
     const selected = (resultId) => {
         if (resultId) {
           console.log("Search component - user clicked", resultId);
-          onSelectUser(resultId);
+          dispatch(setSelectedUser(resultId)) //dispatch action
         }
       };
       

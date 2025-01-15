@@ -1,33 +1,35 @@
 import React, { useEffect, useState } from "react"
 import { get ,post  } from "../api/api"
 import { convertToRelativeTime } from "../functions/time"
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectConv , setMessageUser } from "../features/layoutSlice";
 
 
-function User ({userId ,  onSelectConvo ,onSideSelect}){
+function User (){
     const currentUser = localStorage.getItem("user_id");
-    console.log("search selected id in userjsx" , userId);
+    const dispatch = useDispatch();
+    //fetch selected user from search => state
+    const userId = useSelector((state)=>state.Layout?.selectedUser)
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [conversation , setconversation] = useState([])
-    const [convoFound, setConvoFound] = useState(null);
-    const [currentConvo, setCurrentConvo] = useState("");
     
 
 
     const get_create_convo = async () => {
         if (!userId) return; // Exit early if no userId
         try {
-          onSelectConvo(null); // Reset conversation ID
-          onSideSelect(null);  // Reset other user
-      
+            dispatch(setSelectConv(null));
+            dispatch(setMessageUser(null));
+
           const response = await post('/conversations', { user_id: currentUser, user: userId });
           console.log("Conversation API response:", response);
       
           if (response.conversation_id) {
             setCurrentConvo(response.conversation_id);
-            onSelectConvo(response.conversation_id); // Set conversation ID
-            onSideSelect(userId);                   // Set other user ID
+            dispatch(setSelectConv(response.conversation_id))
+             dispatch(setMessageUser(userId));                 // Set other user ID
           } else {
             console.error("Failed to create or fetch conversation:", response);
           }
@@ -68,12 +70,10 @@ function User ({userId ,  onSelectConvo ,onSideSelect}){
         }
     }
 
-    const selectConvo = (conversationId , otherUserId)=>{
-        onSelectConvo(conversationId)
-        console.log("other user in userjsx", otherUserId);
-        
-        onSideSelect(otherUserId)
-    }
+    const selectConvo = (conversationId, otherUserId) => {
+        dispatch(setSelectConv(conversationId));
+        dispatch(setMessageUser(otherUserId));
+      };
 
     if (loading) {
         return <div>Loading conversations...</div>;
