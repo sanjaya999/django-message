@@ -23,11 +23,10 @@ function User (){
             dispatch(setSelectConv(null));
             dispatch(setMessageUser(null));
 
-          const response = await post('/conversations', { user_id: currentUser, user: userId });
+          const response = await post('/conversations', { user_id: userId });
           console.log("Conversation API response:", response);
       
           if (response.conversation_id) {
-            setCurrentConvo(response.conversation_id);
             dispatch(setSelectConv(response.conversation_id))
              dispatch(setMessageUser(userId));                 // Set other user ID
           } else {
