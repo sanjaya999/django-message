@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { get, post } from '../api/api';
 import { convertToRelativeTime } from '../functions/time';
+import { useSelector } from 'react-redux';
 
-function Message({ conversationId, otherUser }) {
-  console.log("Message component - Render with:", {
-    conversationId,
-    otherUser
-});
+function Message() {
 
+  const conversationId = useSelector((state) => state.Layout?.selectConv);
+  const otherUser = useSelector((state) => state.Layout?.messageUser);
+  console.log("convoID and otheruser" , conversationId , otherUser)
   const messagesEndRef = useRef(null);
   const currentUser = localStorage.getItem("user_id");
 
@@ -22,6 +22,8 @@ function Message({ conversationId, otherUser }) {
 
   //initialize socket
   useEffect(() => {
+    if (!conversationId) return;
+
     const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
     socketRef.current = new WebSocket(`${wsScheme}://127.0.0.1:9000/ws/chat/${conversationId}`);
 
@@ -54,7 +56,7 @@ function Message({ conversationId, otherUser }) {
             socketRef.current.close();
         }
     };
-}, [conversationId, currentUser]);
+}, [conversationId]);
 
   useEffect(() => {
     scrollToBottom();
