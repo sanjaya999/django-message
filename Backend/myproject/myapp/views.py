@@ -324,8 +324,12 @@ def get_user_conversations(request):
         
         conversations_data = []
         for conv in user_conversations:
-            # Get the other user in the conversation (for non-group chats)
+            # Ensure there is at least one other member
             other_user = conv.members.exclude(id=request.user.id).first()
+
+            # If no other user exists, skip this conversation (or handle as needed)
+            if not other_user:
+                continue  # Or return a default value, like an anonymous user
             
             # Get the last message in this conversation
             last_message = Message.objects.filter(Conversation=conv).order_by('-timestamp').first()
@@ -362,4 +366,4 @@ def get_user_conversations(request):
     except Exception as e:
         return Response({
             'error': str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
