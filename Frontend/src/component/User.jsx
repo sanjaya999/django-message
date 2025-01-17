@@ -99,7 +99,7 @@ function User (){
                         className="conversation-card"
                     >
                         <div className="user-name">{convo.other_user?.fullname || "Unknown User"}</div>
-                        <div className="message-content">{convo.last_message?.content || "No messages yet."}</div>
+                      //  <div className="message-content">{convo.last_message?.content || "No messages yet."}</div>
                         <div className="timestamp">
                             {convo.last_message?.timestamp
                                 ? convertToRelativeTime(convo.last_message.timestamp)
