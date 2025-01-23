@@ -1,4 +1,82 @@
-.body{
+/* Layout.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa; 
+    /* Light gray background for the entire page */
+    overflow: hidden; /* Prevent outer body from scrolling */
+
+}
+
+/* Navigation Bar */
+.nav {
+    background-color: #3b82f6; /* Blue background for the nav bar */
+    color: white;
+    padding: 16px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Main Body Container */
+.body {
     display: flex;
-    flex-direction: row;
+    height: calc(100vh - 60px); /* Full height minus the nav bar height */
+    width: 100%;
+}
+
+/* User Area (Left Side) */
+.userArea {
+    width: 30%; /* 30% of the screen width */
+    background-color: #ffffff; /* White background for the user area */
+    border-right: 1px solid #e5e7eb; /* Light border for separation */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+    padding: 16px;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+}
+
+/* Message Area (Right Side) */
+.messageArea {
+    width: 70%; /* 70% of the screen width */
+    background-color: #ffffff; /* White background for the message area */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+    padding: 16px;
+}
+
+/* Search Component */
+.search-container {
+    margin-bottom: 16px;
+}
+
+/* User Component */
+.conversations-container {
+    margin-top: 16px;
+}
+
+/* Message Component */
+.chat-container {
+    height: 100%; /* Take up the full height of the message area */
+    background-color: #ffffff; /* White background for the chat container */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    overflow: hidden;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .body {
+        flex-direction: column; /* Stack user area and message area vertically on small screens */
+    }
+
+    .userArea {
+        width: 100%; /* Full width on small screens */
+        border-right: none; /* Remove border on small screens */
+        border-bottom: 1px solid #e5e7eb; /* Add border at the bottom */
+    }
+
+    .messageArea {
+        width: 100%; /* Full width on small screens */
+    }
 }
