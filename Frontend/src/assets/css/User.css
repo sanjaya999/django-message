@@ -1,40 +1,95 @@
+/* Main Container */
 .conversations-container {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+    background-color: #ffffff; /* White background for a clean look */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    min-height: 60vh; /* Ensure the container takes full height */
 }
 
+/* Conversation Card */
 .conversation-card {
-    background: white;
-    border-radius: 8px;
+    background: #f8f9fa; /* Light gray background for cards */
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* Subtle shadow for cards */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e9ecef; /* Light border for separation */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .conversation-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow on hover */
     cursor: pointer;
+    background-color: #ffffff; /* White background on hover for contrast */
 }
 
+/* User Name */
 .user-name {
     font-size: 16px;
     font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 8px;
+    color: #212529; /* Dark gray for text */
+    margin-bottom: 4px;
 }
 
+/* Message Content */
 .message-content {
     font-size: 14px;
-    color: #4b5563;
-    margin-bottom: 8px;
+    color: #495057; /* Medium gray for secondary text */
+    margin-bottom: 4px;
     line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+/* Timestamp */
 .timestamp {
     font-size: 12px;
-    color: #6b7280;
+    color: #6c757d; /* Light gray for less important text */
+    align-self: flex-end;
+}
+
+/* Loading and Error States */
+.conversations-container > div {
+    text-align: center;
+    font-size: 16px;
+    color: #6c757d; /* Light gray for placeholder text */
+    padding: 20px;
+}
+
+/* No Conversations Found */
+.conversations-container > div:empty::before {
+    content: "No conversations found.";
+    color: #6c757d; /* Light gray for placeholder text */
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .conversations-container {
+        padding: 10px;
+    }
+
+    .conversation-card {
+        padding: 12px;
+    }
+
+    .user-name {
+        font-size: 14px;
+    }
+
+    .message-content {
+        font-size: 13px;
+    }
+
+    .timestamp {
+        font-size: 11px;
+    }
 }
