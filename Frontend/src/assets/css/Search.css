@@ -2,7 +2,10 @@
 .search-container {
     max-width: 600px;
     margin: 2rem auto;
-    padding: 1rem;
+    padding: 1.5rem;
+    background-color: #ffffff; /* White background for a clean look */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
 }
 
 .search-form {
@@ -11,27 +14,29 @@
 
 .search-wrapper {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
 }
 
 .search-input {
     flex: 1;
     padding: 0.75rem 1rem;
     font-size: 1rem;
-    border: 2px solid #e2e8f0;
+    border: 2px solid #e2e8f0; /* Light gray border */
     border-radius: 8px;
     outline: none;
     transition: all 0.3s ease;
+    background-color: #f8fafc; /* Light background for input */
+    color: #1e293b; /* Dark text for contrast */
 }
 
 .search-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6; /* Blue border on focus */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); /* Subtle focus shadow */
 }
 
 .search-input:disabled {
-    background-color: #f1f5f9;
+    background-color: #f1f5f9; /* Light gray when disabled */
     cursor: not-allowed;
 }
 
@@ -40,7 +45,7 @@
     font-size: 1rem;
     font-weight: 500;
     color: white;
-    background-color: #3b82f6;
+    background-color: #3b82f6; /* Blue background */
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -48,25 +53,25 @@
 }
 
 .search-button:hover:not(:disabled) {
-    background-color: #2563eb;
-    transform: translateY(-1px);
+    background-color: #2563eb; /* Darker blue on hover */
+    transform: translateY(-1px); /* Slight lift effect */
 }
 
 .search-button:disabled {
-    background-color: #94a3b8;
+    background-color: #94a3b8; /* Gray when disabled */
     cursor: not-allowed;
 }
 
 .search-button.loading {
     position: relative;
-    background-color: #94a3b8;
+    background-color: #94a3b8; /* Gray when loading */
 }
 
 .error-message {
     margin-top: 1rem;
     padding: 0.75rem;
-    color: #dc2626;
-    background-color: #fee2e2;
+    color: #dc2626; /* Red for errors */
+    background-color: #fee2e2; /* Light red background */
     border-radius: 6px;
     text-align: center;
     font-size: 0.875rem;
@@ -82,17 +87,18 @@
 .result-item {
     padding: 1rem;
     background-color: white;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e2e8f0; /* Light gray border */
     border-radius: 8px;
     transition: all 0.3s ease;
     cursor: pointer;
+    color: #1e293b; /* Dark text for readability */
 }
 
 .result-item:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px); /* Lift effect on hover */
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    border-color: #3b82f6;
+                0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Subtle shadow */
+    border-color: #3b82f6; /* Blue border on hover */
 }
 
 @keyframes fadeIn {
@@ -107,5 +113,5 @@
 }
 
 .result-item {
-    animation: fadeIn 0.3s ease forwards;
+    animation: fadeIn 0.3s ease forwards; /* Fade-in animation */
 }

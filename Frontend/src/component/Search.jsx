@@ -54,45 +54,40 @@ function Search() {
 
     return (
         <div className="search-container">
-            <form className="search-form" 
-            onSubmit={handleSubmit}>
-               <div className="search-wrapper">
-                    <input
-                        className="search-input"
-                        type="text"
-                        value={searchValue}
-                        onChange={handleChange}
-                        placeholder="Search users..."
-                        disabled={isLoading}
-                    />
-                    <button 
-                        type="submit" 
-                        className={`search-button ${isLoading ? 'loading' : ''}`}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "Searching..." : "Search"}
-                    </button>
-                </div>
-                {error && <div>{error}</div>}
+        <form className="search-form" onSubmit={handleSubmit}>
+            <div className="search-wrapper">
+                <input
+                    className="search-input"
+                    type="text"
+                    value={searchValue}
+                    onChange={handleChange}
+                    placeholder="Search users..."
+                    disabled={isLoading}
+                />
+                <button
+                    type="submit"
+                    className={`search-button ${isLoading ? 'loading' : ''}`}
+                    disabled={isLoading}
+                >
+                    {isLoading ? "Searching..." : "Search"}
+                </button>
+            </div>
+            {error && <div className="error-message">{error}</div>}
             {results.length > 0 && (
-                <div  className="results-container">
-                    {results.map((result) =>(
-                        <div key={result.id}
-                        onClick={()=>selected(result.id)}
-                        className="result-item"
+                <div className="results-container">
+                    {results.map((result) => (
+                        <div
+                            key={result.id}
+                            onClick={() => selected(result.id)}
+                            className="result-item"
                         >
-                         
-                        {result.fullName}
-
+                            {result.fullName}
                         </div>
                     ))}
                 </div>
             )}
-            </form>
-            
-
-            
-        </div>
+        </form>
+    </div>
     );
 }
 
