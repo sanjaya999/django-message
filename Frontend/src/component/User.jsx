@@ -46,7 +46,21 @@ function User() {
                             if (data.type === "chat_message") {
                                 const messageData = data.message;
                                 
-                                if(messageData.sender.id.toString() === currentUser){
+                                if (messageData.sender.id.toString() === currentUser) {
+                                    // Update the sender's conversation list with the new message
+                                    setConversations((prevConversations) =>
+                                        prevConversations.map((prevConvo) =>
+                                            prevConvo.conversation_id === convo.conversation_id
+                                                ? {
+                                                    ...prevConvo,
+                                                    last_message: {
+                                                        content: messageData.content,
+                                                        timestamp: messageData.timestamp,
+                                                    },
+                                                }
+                                                : prevConvo
+                                        )
+                                    );
                                     return;
                                 }
                                 // Check if the user is currently viewing this conversation
