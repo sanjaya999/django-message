@@ -56,7 +56,7 @@ function User() {
                                                     last_message: {
                                                         content: messageData.content,
                                                         timestamp: messageData.timestamp,
-                                                    },
+                                                    },isNewMessage: true,
                                                 }
                                                 : prevConvo
                                         )
@@ -101,7 +101,7 @@ function User() {
                                                 last_message: {
                                                     content: messageData.content,
                                                     timestamp: messageData.timestamp,
-                                                },
+                                                },isNewMessage: true,
                                             }
                                             : prevConvo
                                     )
@@ -148,6 +148,17 @@ function User() {
         setNotifications((prev) =>
             prev.filter((notification) => notification.conversationId !== conversationId)
         );
+
+        setConversations((prevConversations) =>
+            prevConversations.map((prevConvo) =>
+                prevConvo.conversation_id === conversationId
+                    ? {
+                        ...prevConvo,
+                        isNewMessage: false, // Mark as read
+                    }
+                    : prevConvo
+            )
+        );
     };
 
     // Show a loading spinner while fetching conversations
@@ -179,7 +190,9 @@ function User() {
                     >
                         <div className="user-name">{convo.other_user?.fullname || "Unknown User"}</div>
 
-                        <div className="message-content">{convo.last_message?.content || "No messages yet."}</div>
+                        <div className="message-content"
+                         style={{ fontWeight: convo.isNewMessage ? "bold" : "normal" }}
+                        >{convo.last_message?.content || "No messages yet."}</div>
 
                         <div className="timestamp">
                             {convo.last_message?.timestamp
