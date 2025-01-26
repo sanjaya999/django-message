@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { get } from "../api/api";
+import { get,post } from "../api/api";
 import { useDispatch } from "react-redux";
 import { setSelectedUser } from "../features/layoutSlice";
 
@@ -16,8 +16,26 @@ function Search() {
         setError(null);
     };
     
-    const selected = (resultId) => {
+    const selected = async(resultId) => {
         if (resultId) {
+            try {
+                const response = await post('conversations', { user_id: resultId });
+                console.log("API Response:", response); // Debugging log
+    
+                if (response && response.conversation_id) {
+                   const conversationId = response.conversation_id; // Use the returned conversation_id
+                    console.log("New conversation ID:", conversationId); // Debugging log
+                    dispatch(setSelectConv(conversationId));
+                    dispatch(setMessageUser(resultId));
+
+            }
+    
+           
+            
+        } catch (error) {
+            console.log(error)
+        }
+
           console.log("Search component - user clicked", resultId);
           dispatch(setSelectedUser(resultId)) //dispatch action
         }
@@ -51,6 +69,13 @@ function Search() {
             setIsLoading(false);
         }
     };
+
+    const checkUser = async()=>{
+       
+    }
+    checkUser();
+
+
 
     return (
         <div className="search-container">
