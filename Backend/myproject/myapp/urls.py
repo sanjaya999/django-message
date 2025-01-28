@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 from .views import index , test_view  # Import specific view functions
 from .views import user_registration , login ,search_users, get_or_create_conversation,post_message,get_messages,get_user_conversations
 urlpatterns = [
@@ -14,4 +16,4 @@ urlpatterns = [
 
 
 
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
