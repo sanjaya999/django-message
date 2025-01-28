@@ -157,6 +157,7 @@ def post_message(request):
         conversation_id = request.data.get("conversation_id")
         content = request.data.get("content")
         reply_to_id = request.data.get("reply_to_id")   
+        image = request.FILES.get('image') 
 
         if not conversation_id:
             return Response({
@@ -198,6 +199,7 @@ def post_message(request):
             Conversation=chat_conversation,
             sender=request.user,
             content=content,
+            image=image,
             reply_to=reply_to,
             is_read=False
         )
@@ -215,6 +217,7 @@ def post_message(request):
                 'username': request.user.fullname
             },
             'content': content,
+            'image': message.image.url if message.image else None,
             'timestamp': message.timestamp.isoformat(),
             'is_read': message.is_read
         }
@@ -224,6 +227,7 @@ def post_message(request):
             response_data['reply_to'] = {
                 'id': reply_to.id,
                 'content': reply_to.content,
+                'image': reply_to.image.url if reply_to.image else None,
                 'sender': {
                     'id': reply_to.sender.id,
                     'username': reply_to.sender.username
@@ -273,6 +277,7 @@ def get_messages(request, conversation_id):
             message_dict = {
                 'id': message.id,
                 'content': message.content,
+                'image': message.image.url if message.image else None,
                 'sender': {
                     'id': message.sender.id,
                     'username': message.sender.fullname
@@ -348,6 +353,7 @@ def get_user_conversations(request):
                 } if other_user else None,
                 'last_message': {
                     'content': last_message.content,
+                    'image': last_message.image.url if last_message.image else None,
                     'timestamp': last_message.timestamp.isoformat(),
                     'sender_id': last_message.sender.id
                 } if last_message else None,
