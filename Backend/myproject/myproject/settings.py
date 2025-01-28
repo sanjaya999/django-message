@@ -210,3 +210,6 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1'
 ]
+
+MEDIA_URL = '/message_images/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'message_images')
