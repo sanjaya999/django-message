@@ -1,10 +1,10 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from .models import Message, conversation as Conversation , CustomUser
-from django.contrib.auth.models import User
-from asgiref.sync import sync_to_async
-
+from .models import Message, conversation as Conversation, CustomUser
+from django.core.files.base import ContentFile
+import base64
+from django.conf import settings  # Import settings from django.conf
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -12,7 +12,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
         self.room_group_name = f'chat_{self.conversation_id}'
         await self._join_room()
-        
+
     async def disconnect(self, close_code):
         """Handle WebSocket disconnection"""
         await self._leave_room()
@@ -24,7 +24,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'chat_message': self._handle_chat_message,
             'typing': self._handle_typing_status
         }
-        
+
         message_type = data.get('type')
         if message_type in handlers:
             await handlers[message_type](data)
@@ -48,8 +48,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Handle incoming chat messages"""
         message = data.get('message')
         user_id = data.get('user_id')
-        
-        saved_message = await self._save_message_to_db(user_id, message)
+        image_base64 = data.get('image')
+
+        image_file = None
+        if image_base64:
+            try:
+                # Decode the Base64 image
+                format, imgstr = image_base64.split(';base64,')
+                ext = format.split('/')[-1]
+                image_file = ContentFile(base64.b64decode(imgstr), name=f'temp.{ext}')
+            except (ValueError, KeyError, IndexError) as e:
+                print(f"Error decoding image: {str(e)}")
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'message': 'Invalid image format'
+                }))
+                return
+
+        # Save the message to the database
+        saved_message = await self._save_message_to_db(user_id, message, image_file)
+        if image_file:
+            await database_sync_to_async(saved_message.image.close)()
+            
         await self._broadcast_message(saved_message)
 
     async def _handle_typing_status(self, data):
@@ -75,9 +95,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     def _format_message(self, message):
         """Format message for broadcasting"""
+        image_url = message.image.url if message.image else None
+        if image_url and image_url.startswith(settings.MEDIA_URL):
+            image_url = image_url[len(settings.MEDIA_URL):]  # Remove the duplicated MEDIA_URL
+
         return {
             'id': message.id,
             'content': message.content,
+            'image': image_url,  # Use the corrected image URL
             'timestamp': message.timestamp.isoformat(),
             'sender': {
                 'id': message.sender.id,
@@ -101,15 +126,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def _save_message_to_db(self, user_id, message_content):
+    def _save_message_to_db(self, user_id, message_content, image_file=None):
         """Save message to database"""
         try:
             user = CustomUser.objects.get(id=user_id)
             conv = Conversation.objects.get(id=self.conversation_id)
             return Message.objects.create(
                 sender=user,
-                Conversation=conv,  # Changed from 'conversation' to 'Conversation' to match model
-                content=message_content
+                Conversation=conv,
+                content=message_content,
+                image=image_file  # Save the image file
             )
         except (CustomUser.DoesNotExist, Conversation.DoesNotExist) as e:
             print(f"Error saving message: {str(e)}")
