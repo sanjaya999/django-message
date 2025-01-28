@@ -10,12 +10,14 @@ function Message() {
   console.log("convoID and otheruser" , conversationId , otherUser)
   const messagesEndRef = useRef(null);
   const currentUser = localStorage.getItem("user_id");
+  const [imageFile, setImageFile] = useState(null);
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const socketRef = useRef(null);
 
-
+  const backendBaseUrl = 'http://localhost:9000';
+ 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -40,6 +42,10 @@ function Message() {
         const data = JSON.parse(event.data);
         console.log("Received message:", data); // Debug incoming messages
         if (data.type === "chat_message") {
+          const message = data.message;
+          if (message.image && !message.image.startsWith(backendBaseUrl)) {
+            message.image = `${backendBaseUrl}${message.image}`;
+          }
             setMessages((prev) => [...prev, data.message].sort(
                 (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
             ));
@@ -91,17 +97,34 @@ const handleSubmit = async (e) => {
     if (!newMessage.trim()) return;
 
     try {
-        if (socketRef.current.readyState === WebSocket.OPEN) {
+      if (socketRef.current.readyState === WebSocket.OPEN) {
+        if (imageFile) {
+          // Convert image file to Base64
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64Image = reader.result;
             socketRef.current.send(JSON.stringify({
-                type: 'chat_message',
-                message: newMessage,
-                user_id: currentUser
+              type: 'chat_message',
+              message: newMessage,
+              image: base64Image, // Send Base64 image
+              user_id: currentUser
             }));
             setNewMessage('');
+            setImageFile(null);
+          };
+          reader.readAsDataURL(imageFile);
         } else {
-            console.error("WebSocket is not connected");
-            // Optionally retry connection or show error to user
+          // Send text message
+          socketRef.current.send(JSON.stringify({
+            type: 'chat_message',
+            message: newMessage,
+            user_id: currentUser
+          }));
+          setNewMessage('');
         }
+      } else {
+        console.error("WebSocket is not connected");
+      }
     } catch (error) {
         console.error("Error sending message:", error);
     }
@@ -110,6 +133,9 @@ const handleSubmit = async (e) => {
   const formatTime = (timestamp) => {
     
     return convertToRelativeTime(timestamp)
+  };
+  const handleImageChange = (e) => {
+    setImageFile(e.target.files[0]);
   };
 
   const handleInputChange = (e) => {
@@ -135,6 +161,8 @@ const handleSubmit = async (e) => {
                
                 <div>
                   <div className={`message-bubble ${isCurrentUser ? 'message-bubble-right' : 'message-bubble-left'}`}>
+                    {console.log(message.image)}
+                  {message.image && <img src={`${backendBaseUrl}${message.image} `}alt="Message" className="message-image" />}
                     <p>{message.content}</p>
                     <div className={`timestamp ${isCurrentUser ? 'timestamp-right' : 'timestamp-left'}`}>
                       {formatTime(message.timestamp)}
@@ -156,6 +184,11 @@ const handleSubmit = async (e) => {
             onChange={handleInputChange}
             placeholder="Type a message..."
             className="message-input"
+          />
+          <input
+            type="file"
+            onChange={handleImageChange}
+            className="image-input"
           />
           <button type="submit" className="send-button">
             Send
