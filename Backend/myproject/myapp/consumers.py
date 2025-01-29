@@ -69,7 +69,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         saved_message = await self._save_message_to_db(user_id, message, image_file)
         if image_file:
             await database_sync_to_async(saved_message.image.close)()
-            
         await self._broadcast_message(saved_message)
 
     async def _handle_typing_status(self, data):
@@ -96,9 +95,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def _format_message(self, message):
         """Format message for broadcasting"""
         image_url = message.image.url if message.image else None
-        if image_url and image_url.startswith(settings.MEDIA_URL):
-            image_url = image_url[len(settings.MEDIA_URL):]  # Remove the duplicated MEDIA_URL
-
+        
         return {
             'id': message.id,
             'content': message.content,

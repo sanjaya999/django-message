@@ -11,6 +11,7 @@ function Message() {
   const messagesEndRef = useRef(null);
   const currentUser = localStorage.getItem("user_id");
   const [imageFile, setImageFile] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -161,7 +162,7 @@ const handleSubmit = async (e) => {
                
                 <div>
                   <div className={`message-bubble ${isCurrentUser ? 'message-bubble-right' : 'message-bubble-left'}`}>
-                    {console.log(message.image)}
+                    {console.log("this is url " , message.image)}
                   {message.image && <img src={`${backendBaseUrl}${message.image} `}alt="Message" className="message-image" />}
                     <p>{message.content}</p>
                     <div className={`timestamp ${isCurrentUser ? 'timestamp-right' : 'timestamp-left'}`}>
