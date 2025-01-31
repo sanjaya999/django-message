@@ -137,3 +137,42 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except (CustomUser.DoesNotExist, Conversation.DoesNotExist) as e:
             print(f"Error saving message: {str(e)}")
             raise ValueError(f"Database error: {str(e)}")
+        
+class CallConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        """Handle new WebSocket connection for WebRTC signaling."""
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_group_name = f'call_{self.room_name}'
+
+        # Join the room group
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        """Handle WebSocket disconnection."""
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        """Handle incoming WebSocket messages for WebRTC signaling."""
+        data = json.loads(text_data)
+        message_type = data.get('type')
+
+        if message_type == 'offer' or message_type == 'answer' or message_type == 'candidate':
+            # Broadcast the signaling message to the other peer in the room
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'signal_message',
+                    'data': data
+                }
+            )
+
+    async def signal_message(self, event):
+        """Send signaling messages to WebSocket."""
+        await self.send(text_data=json.dumps(event['data']))
