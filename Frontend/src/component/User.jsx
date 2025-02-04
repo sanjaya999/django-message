@@ -3,9 +3,11 @@ import { get,post } from "../api/api";
 import { convertToRelativeTime } from "../functions/time";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectConv, setMessageUser } from "../features/layoutSlice";
+import Call from "./Call";
 
 function User() {
     const currentUser = localStorage.getItem("user_id");
+    const [isCallActive, setIsCallActive] = useState(false);
     const dispatch = useDispatch();
     const selectedConversation = useSelector((state) => state.Layout?.selectConv);
     const sockets = useRef({});
@@ -123,6 +125,13 @@ function User() {
             [conversationId]: 0, // Reset notification count to 0
         }));
     };
+    const startCall = (conversationId) => {
+        setIsCallActive(true);
+    };
+
+    const endCall = () => {
+        setIsCallActive(false);
+    };
 
   
 
@@ -161,8 +170,17 @@ function User() {
                                 ? convertToRelativeTime(convo.last_message.timestamp)
                                 : ""}
                         </div>
+                        <button onClick={() => startCall(convo.conversation_id)}>Start Call</button>
+
                     </div>
                 ))
+            )}
+            {isCallActive && (
+                <Call
+                    conversationId={selectedConversation}
+                    onEndCall={endCall}
+                    socket={sockets.current[selectedConversation]} // Pass the existing WebSocket
+                />
             )}
         </div>
     );
