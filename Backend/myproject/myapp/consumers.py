@@ -20,9 +20,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         """Handle incoming WebSocket messages"""
         data = json.loads(text_data)
+        print(f"Received WebSocket Message: {data}")  # Debugging log
+
         handlers = {
             'chat_message': self._handle_chat_message,
-            'typing': self._handle_typing_status
+            'typing': self._handle_typing_status,
+            # WebRTC signaling types
+            'offer': self._handle_webrtc_signal,
+            'answer': self._handle_webrtc_signal,
+            'candidate': self._handle_webrtc_signal
         }
 
         message_type = data.get('type')
@@ -43,6 +49,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
+    async def _handle_webrtc_signal(self, data):
+        """Handle WebRTC signaling messages"""
+        print(f"Handling WebRTC Signal: {data}")
+        
+        # Broadcast WebRTC signal to all clients in the conversation
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'webrtc_signal',
+                'data': data
+            }
+        )
+
+    async def webrtc_signal(self, event):
+        """Send WebRTC signaling message to WebSocket"""
+        await self.send(text_data=json.dumps(event['data']))
 
     async def _handle_chat_message(self, data):
         """Handle incoming chat messages"""
