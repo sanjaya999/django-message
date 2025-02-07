@@ -37,10 +37,14 @@ function User() {
 
                         socket.onopen = () => {
                             console.log(`WebSocket connected for conversation ${convo.conversation_id}`);
+                            console.log(`WebSocket URL: ${socket.url}`);
+                            console.log(`WebSocket Ready State: ${socket.readyState}`);
                         };
 
                         socket.onmessage = (event) => {
                             const data = JSON.parse(event.data);
+                            console.log('Raw WebSocket message received:', event.data);
+
                             if (data.type === "chat_message") {
                                 const messageData = data.message;
 
@@ -126,6 +130,8 @@ function User() {
         }));
     };
     const startCall = (conversationId) => {
+        console.log('Starting call for conversation:', conversationId);
+        console.log('Socket:', sockets.current[conversationId]);
         setIsCallActive(true);
     };
 

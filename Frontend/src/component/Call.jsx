@@ -1,46 +1,45 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { resetCallState } from '../features/callSlice';
-import { useSelector } from 'react-redux';
 
 function Call({ conversationId, onEndCall, socket }) {
     const dispatch = useDispatch();
-    const localVideoRef = useRef(null); // Initialize ref with null
-    const remoteVideoRef = useRef(null); // Initialize ref with null
+    const localVideoRef = useRef(null);
+    const remoteVideoRef = useRef(null);
 
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
     const pcRef = useRef(null);
 
-    // Ensure the <video> elements are rendered before initializing WebRTC
-    const [isVideoReady, setIsVideoReady] = useState(false);
-
     useEffect(() => {
-        // Check if the <video> elements are available
-        if (localVideoRef.current && remoteVideoRef.current) {
-            setIsVideoReady(true);
-        }
-    }, [localVideoRef.current, remoteVideoRef.current]);
-
-    useEffect(() => {
-        if (!isVideoReady) return; // Wait until <video> elements are ready
-
+  
         const initializeWebRTC = async () => {
             try {
+                console.log('Detailed WebRTC Initialization Started');
                 // Get local media stream
+                console.log('Requesting user media');
+
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 setLocalStream(stream);
+                console.log('Local media stream obtained');
 
-                // Set the local video stream
+
+                // Safely set local video stream
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
-                } else {
-                    console.error("localVideoRef is not attached to a <video> element.");
                 }
 
-                // Create a new RTCPeerConnection
+                // Create a new RTCPeerConnection with STUN servers
+                // const configuration = {
+                //     iceServers: [
+                //         { urls: 'stun:stun.l.google.com:19302' },
+                //         { urls: 'stun:stun1.l.google.com:19302' }
+                //     ]
+                // };
                 const pc = new RTCPeerConnection();
                 pcRef.current = pc;
+                console.log('RTCPeerConnection created');
+
 
                 // Add local stream tracks to the peer connection
                 stream.getTracks().forEach((track) => pc.addTrack(track, stream));
@@ -48,82 +47,103 @@ function Call({ conversationId, onEndCall, socket }) {
                 // Handle remote stream
                 pc.ontrack = (event) => {
                     setRemoteStream(event.streams[0]);
-
-                    // Set the remote video stream
                     if (remoteVideoRef.current) {
                         remoteVideoRef.current.srcObject = event.streams[0];
-                    } else {
-                        console.error("remoteVideoRef is not attached to a <video> element.");
                     }
                 };
 
                 // Handle ICE candidates
                 pc.onicecandidate = (event) => {
-                    if (event.candidate && socket.readyState === WebSocket.OPEN) {
+                    if (event.candidate) {
                         socket.send(JSON.stringify({
                             type: 'webrtc_signal',
                             candidate: event.candidate,
+                            conversationId: conversationId
                         }));
                     }
                 };
 
-                // Handle incoming WebSocket messages
-                socket.onmessage = async (event) => {
-                    const data = JSON.parse(event.data);
-
-                    if (data.offer) {
-                        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-                        const answer = await pc.createAnswer();
-                        await pc.setLocalDescription(answer);
-
-                        // Send answer to the other peer
-                        if (socket.readyState === WebSocket.OPEN) {
+                // Handle WebSocket messages
+                const handleSocketMessage = async (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.log('Received WebSocket message:', data);
+                
+                        // Ensure message is for this conversation
+                        if (data.conversationId !== conversationId) {
+                            console.log('Message not for this conversation. Ignoring.');
+                            return;
+                        }
+                
+                        if (data.offer) {
+                            console.log('Received offer');
+                            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                            const answer = await pc.createAnswer();
+                            await pc.setLocalDescription(answer);
+                
                             socket.send(JSON.stringify({
                                 type: 'webrtc_signal',
                                 answer: answer,
+                                conversationId: conversationId
                             }));
+                        } else if (data.answer) {
+                            console.log('Received answer');
+                            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                        } else if (data.candidate) {
+                            console.log('Received ICE candidate');
+                            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        } else {
+                            console.log('Unhandled WebSocket message type');
                         }
-                    } else if (data.answer) {
-                        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-                    } else if (data.candidate && pc.remoteDescription) {
-                        await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    } catch (error) {
+                        console.error('Error handling WebSocket message:', error);
                     }
                 };
 
-                // Create an offer to start the call
+                socket.addEventListener('message', (event) => {
+                    console.log('Call Component - Raw WebSocket message:', event.data);
+                    
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.log('Call Component - Parsed WebSocket message:', data);
+                        
+                        // Existing handleSocketMessage logic
+                        handleSocketMessage(event);
+                    } catch (parseError) {
+                        console.error('Call Component - Error parsing WebSocket message:', parseError);
+                    }
+                });
+                // Create and send offer
                 const offer = await pc.createOffer();
                 await pc.setLocalDescription(offer);
 
-                // Send offer to the other peer
-                if (socket.readyState === WebSocket.OPEN) {
-                    socket.send(JSON.stringify({
-                        type: 'webrtc_signal',
-                        offer: offer,
-                    }));
-                }
+                socket.send(JSON.stringify({
+                    type: 'webrtc_signal',
+                    offer: offer,
+                    conversationId: conversationId
+                }));
+
+                return () => {
+                    socket.removeEventListener('message', handleSocketMessage);
+                };
+
             } catch (error) {
-                console.error('Error initializing WebRTC:', error);
+                console.error('WebRTC Initialization Error:', error);
             }
         };
 
         initializeWebRTC();
 
         return () => {
-            // Clean up WebRTC resources
-            if (pcRef.current) {
-                pcRef.current.close();
-            }
-            if (localStream) {
-                localStream.getTracks().forEach((track) => track.stop());
-            }
+            if (pcRef.current) pcRef.current.close();
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
             dispatch(resetCallState());
         };
-    }, [conversationId, dispatch, socket, isVideoReady]);
+    }, [conversationId, socket]);
 
     return (
         <div className="call-container">
             <div className="video-container">
-                {/* Attach ref to <video> elements */}
                 <video ref={localVideoRef} autoPlay muted className="local-video" />
                 <video ref={remoteVideoRef} autoPlay className="remote-video" />
             </div>
