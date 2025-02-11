@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { resetCallState } from '../features/callSlice';
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { resetCallState } from "../features/callSlice";
 
 function Call({ conversationId, onEndCall, socket }) {
     const dispatch = useDispatch();
@@ -12,34 +12,34 @@ function Call({ conversationId, onEndCall, socket }) {
     const pcRef = useRef(null);
 
     useEffect(() => {
-  
         const initializeWebRTC = async () => {
             try {
-                console.log('Detailed WebRTC Initialization Started');
+                console.log("Detailed WebRTC Initialization Started");
                 // Get local media stream
-                console.log('Requesting user media');
+                console.log("Requesting user media");
 
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true,
+                });
                 setLocalStream(stream);
-                console.log('Local media stream obtained');
-
+                console.log("Local media stream obtained");
 
                 // Safely set local video stream
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
                 }
 
-                // Create a new RTCPeerConnection with STUN servers
+                // Uncomment and use the RTCPeerConnection configuration
                 // const configuration = {
                 //     iceServers: [
                 //         { urls: 'stun:stun.l.google.com:19302' },
                 //         { urls: 'stun:stun1.l.google.com:19302' }
                 //     ]
                 // };
-                const pc = new RTCPeerConnection();
+                const pc = new RTCPeerConnection(); // Use the configuration
                 pcRef.current = pc;
-                console.log('RTCPeerConnection created');
-
+                console.log("RTCPeerConnection created");
 
                 // Add local stream tracks to the peer connection
                 stream.getTracks().forEach((track) => pc.addTrack(track, stream));
@@ -55,88 +55,101 @@ function Call({ conversationId, onEndCall, socket }) {
                 // Handle ICE candidates
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
-                        socket.send(JSON.stringify({
-                            type: 'webrtc_signal',
-                            candidate: event.candidate,
-                            conversationId: conversationId
-                        }));
+                        socket.send(
+                            JSON.stringify({
+                                type: "webrtc_signal",
+                                candidate: event.candidate,
+                                conversationId: conversationId,
+                            })
+                        );
                     }
                 };
 
                 // Handle WebSocket messages
-                const handleSocketMessage = async (event) => {
+                // Modify the socket event listener and handleSocketMessage function
+                const handleSocketMessage = async (data) => {
+                    // Change parameter to data
                     try {
-                        const data = JSON.parse(event.data);
-                        console.log('Received WebSocket message:', data);
-                
+                        console.log("Received WebSocket message:", data);
+
                         // Ensure message is for this conversation
                         if (data.conversationId !== conversationId) {
-                            console.log('Message not for this conversation. Ignoring.');
+                            console.log("Message not for this conversation. Ignoring.");
                             return;
                         }
-                
+
                         if (data.offer) {
-                            console.log('Received offer');
-                            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                            console.log("Received offer");
+                            await pc.setRemoteDescription(
+                                new RTCSessionDescription(data.offer)
+                            );
                             const answer = await pc.createAnswer();
                             await pc.setLocalDescription(answer);
-                
-                            socket.send(JSON.stringify({
-                                type: 'webrtc_signal',
-                                answer: answer,
-                                conversationId: conversationId
-                            }));
+
+                            socket.send(
+                                JSON.stringify({
+                                    type: "webrtc_signal",
+                                    answer: answer,
+                                    conversationId: conversationId,
+                                })
+                            );
                         } else if (data.answer) {
-                            console.log('Received answer');
-                            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                            console.log("Received answer");
+                            await pc.setRemoteDescription(
+                                new RTCSessionDescription(data.answer)
+                            );
                         } else if (data.candidate) {
-                            console.log('Received ICE candidate');
+                            console.log("Received ICE candidate");
                             await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
                         } else {
-                            console.log('Unhandled WebSocket message type');
+                            console.log("Unhandled WebSocket message type");
                         }
                     } catch (error) {
-                        console.error('Error handling WebSocket message:', error);
+                        console.error("Error handling WebSocket message:", error);
                     }
                 };
 
-                socket.addEventListener('message', (event) => {
-                    console.log('Call Component - Raw WebSocket message:', event.data);
-                    
+                // Update the socket event listener to pass parsed data
+                socket.addEventListener("message", (event) => {
+                    console.log("Call Component - Raw WebSocket message:", event.data);
+
                     try {
                         const data = JSON.parse(event.data);
-                        console.log('Call Component - Parsed WebSocket message:', data);
-                        
-                        // Existing handleSocketMessage logic
-                        handleSocketMessage(event);
+                        console.log("Call Component - Parsed WebSocket message:", data);
+                        handleSocketMessage(data); // Pass data instead of event
                     } catch (parseError) {
-                        console.error('Call Component - Error parsing WebSocket message:', parseError);
+                        console.error(
+                            "Call Component - Error parsing WebSocket message:",
+                            parseError
+                        );
                     }
                 });
                 // Create and send offer
                 const offer = await pc.createOffer();
                 await pc.setLocalDescription(offer);
 
-                socket.send(JSON.stringify({
-                    type: 'webrtc_signal',
-                    offer: offer,
-                    conversationId: conversationId
-                }));
+                socket.send(
+                    JSON.stringify({
+                        type: "webrtc_signal",
+                        offer: offer,
+                        conversationId: conversationId,
+                    })
+                );
 
                 return () => {
-                    socket.removeEventListener('message', handleSocketMessage);
+                    socket.removeEventListener("message", handleSocketMessage);
                 };
-
             } catch (error) {
-                console.error('WebRTC Initialization Error:', error);
+                console.error("WebRTC Initialization Error:", error);
             }
         };
 
         initializeWebRTC();
 
+        // Update the cleanup in useEffect
         return () => {
             if (pcRef.current) pcRef.current.close();
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (localStream) localStream.getTracks().forEach((track) => track.stop());
             dispatch(resetCallState());
         };
     }, [conversationId, socket]);
