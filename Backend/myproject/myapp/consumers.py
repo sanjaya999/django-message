@@ -26,9 +26,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'chat_message': self._handle_chat_message,
             'typing': self._handle_typing_status,
             # WebRTC signaling types
-            'offer': self._handle_webrtc_signal,
-            'answer': self._handle_webrtc_signal,
-            'candidate': self._handle_webrtc_signal
+            'webrtc_signal': self._handle_webrtc_signal,  # Add this line
+
         }
 
         message_type = data.get('type')
