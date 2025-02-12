@@ -2,11 +2,14 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { get, post } from '../api/api';
 import { convertToRelativeTime } from '../functions/time';
 import { useSelector } from 'react-redux';
+import {simpleEncrypt , simpleDecrypt} from "../Encry/encrypt"
+
 function Message() {
 
   const conversationId = useSelector((state) => state.Layout?.selectConv);
   const otherUser = useSelector((state) => state.Layout?.messageUser);
-  console.log("convoID and otheruser" , conversationId , otherUser)
+  const key = useSelector((state) => state.Layout?.publicKey);
+  console.log("convoID and otheruser key" , conversationId , otherUser , key)
   const messagesEndRef = useRef(null);
   const currentUser = localStorage.getItem("user_id");
   const [imageFile, setImageFile] = useState(null);
@@ -44,10 +47,12 @@ function Message() {
         console.log("Received message:", data); // Debug incoming messages
         if (data.type === "chat_message") {
           const message = data.message;
+          message.content = simpleDecrypt(message.content, key);
+
           if (message.image && !message.image.startsWith(backendBaseUrl)) {
             message.image = `${backendBaseUrl}${message.image}`;
           }
-            setMessages((prev) => [...prev, data.message].sort(
+            setMessages((prev) => [...prev, message].sort(
                 (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
             ));
             scrollToBottom();
@@ -124,10 +129,12 @@ const handleSubmit = async (e) => {
           };
           reader.readAsDataURL(imageFile);
         } else {
+          const encryptedMessage = simpleEncrypt(newMessage, key);
+
           // Send text message
           socketRef.current.send(JSON.stringify({
             type: 'chat_message',
-            message: newMessage,
+            message: encryptedMessage,
             user_id: currentUser
           }));
           setNewMessage('');
@@ -171,9 +178,8 @@ const handleSubmit = async (e) => {
                
                 <div>
                   <div className={`message-bubble ${isCurrentUser ? 'message-bubble-right' : 'message-bubble-left'}`}>
-                    {console.log("this is url " , message.image)}
                   {message.image && <img src={`${backendBaseUrl}${message.image} `}alt="Message" className="message-image" />}
-                    <p>{message.content}</p>
+                    <p>{simpleDecrypt(message.content , key)}</p>
                     <div className={`timestamp ${isCurrentUser ? 'timestamp-right' : 'timestamp-left'}`}>
                       {formatTime(message.timestamp)}
                     </div>
