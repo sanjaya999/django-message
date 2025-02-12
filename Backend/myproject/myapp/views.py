@@ -10,7 +10,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import logging
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-
+import os
+import base64
 
 
 
@@ -89,7 +90,6 @@ def login(request):
             "access_token": access_token,
             "user_id": str(user.id), 
             "user_name": user.fullname if hasattr(user, 'fullname') else user.email ,
-            "publicKey": user.public_key if user.public_key else ""
 
         })
         
@@ -144,11 +144,21 @@ def get_or_create_conversation(request):
 
     Conversation = check_existing_conversation(current_user , user_chat)
     if Conversation:
-        return Response({'conversation_id': Conversation.id, 'message': 'Existing conversation found.'})
+        return Response({'conversation_id': Conversation.id, 
+                         'encryption_key': existing_conversation.encryption_key,  # Return existing key
+
+                         'message': 'Existing conversation found.'})
     
+
     new_conversation = conversation.objects.create(title="" , is_group=False)
     new_conversation.members.add(current_user , user_chat)
-    return Response({'conversation_id': new_conversation.id, 'message': 'New conversation created.'})
+    encryption_key = base64.b64encode(os.urandom(32)).decode('utf-8')
+    new_conversation.encryption_key = encryption_key
+    new_conversation.save()
+
+    return Response({'conversation_id': new_conversation.id,
+                      'encryption_key': encryption_key, 
+                      'message': 'New conversation created.'})
 
 
 @api_view(["POST"])
@@ -345,9 +355,17 @@ def get_user_conversations(request):
                 Conversation=conv,
                 is_read=False
             ).exclude(sender=request.user).count()
+
+            if not conv.encryption_key:
+                encryption_key = base64.b64encode(os.urandom(32)).decode('utf-8')
+                conv.encryption_key = encryption_key
+                conv.save()
+            else:
+                encryption_key = conv.encryption_key
             
             conversation_data = {
                 'conversation_id': conv.id,
+                'encryption_key': encryption_key,
                 'other_user': {
                     'id': other_user.id,
                     'fullname': other_user.fullname,
@@ -375,20 +393,3 @@ def get_user_conversations(request):
             'error': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
-def update_public_key(request):
-    # Ensure the user is authenticated
-    if not request.user.is_authenticated:
-        return Response({"message": "User is not authenticated", "status": "401"}, status=status.HTTP_401_UNAUTHORIZED)
-
-    public_key = request.data.get("public_key")
-
-    if not public_key:
-        return Response({"message": "Public key is required", "status": "400"}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Update the user's public key
-    user = request.user
-    user.public_key = public_key
-    user.save()
-
-    return Response({"message": "Public key updated successfully", "status": "200"}, status=status.HTTP_200_OK)
