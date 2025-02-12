@@ -4,7 +4,7 @@ from .models.usermodel import CustomUser , Message , conversation
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ["fullname" , "email" , "password"]
+        fields = ["fullname" , "email" , "password" , "public_key"]
         extra_kwargs = {
             'password': {'write_only': True, 'required': True}
         }
@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = CustomUser(
             fullname = validated_data['fullname'],
             email = validated_data['email'],
+            public_key=validated_data.get('public_key', ''),
         )
         user.set_password(validated_data['password'])
         user.save()

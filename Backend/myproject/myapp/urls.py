@@ -2,7 +2,8 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import index , test_view  # Import specific view functions
-from .views import user_registration , login ,search_users, get_or_create_conversation,post_message,get_messages,get_user_conversations
+from .views import user_registration , login ,search_users, get_or_create_conversation,post_message,get_messages,get_user_conversations,update_public_key
+
 urlpatterns = [
     path('', index, name='index'),
     path('api/test/' , test_view , name="test_view"),
@@ -13,6 +14,7 @@ urlpatterns = [
     path('message', post_message, name='post_message'),
     path('getmessage/<str:conversation_id>', get_messages, name='get_message'),
     path('get-user-conversations', get_user_conversations, name='get-user-conversations'),
+    path('key' , update_public_key , name="update_public_key")
 
 
 

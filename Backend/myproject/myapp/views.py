@@ -88,7 +88,8 @@ def login(request):
             "refresh_token": str(refresh),
             "access_token": access_token,
             "user_id": str(user.id), 
-            "user_name": user.fullname if hasattr(user, 'fullname') else user.email 
+            "user_name": user.fullname if hasattr(user, 'fullname') else user.email ,
+            "publicKey": user.public_key if user.public_key else ""
 
         })
         
@@ -373,3 +374,21 @@ def get_user_conversations(request):
         return Response({
             'error': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+def update_public_key(request):
+    # Ensure the user is authenticated
+    if not request.user.is_authenticated:
+        return Response({"message": "User is not authenticated", "status": "401"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    public_key = request.data.get("public_key")
+
+    if not public_key:
+        return Response({"message": "Public key is required", "status": "400"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Update the user's public key
+    user = request.user
+    user.public_key = public_key
+    user.save()
+
+    return Response({"message": "Public key updated successfully", "status": "200"}, status=status.HTTP_200_OK)

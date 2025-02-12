@@ -8,6 +8,7 @@ class CustomUser(AbstractUser):
 
     username = None
     email = models.EmailField(unique=True)
+    public_key = models.TextField(blank=True, null=True)
 
   
     USERNAME_FIELD = 'email'
