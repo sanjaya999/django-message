@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { get, post } from "../api/api";
 import { convertToRelativeTime } from "../functions/time";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectConv, setMessageUser } from "../features/layoutSlice";
+import { setSelectConv, setMessageUser, setPublicKey } from "../features/layoutSlice";
 
 function User() {
   const currentUser = localStorage.getItem("user_id");
@@ -126,9 +126,11 @@ function User() {
     };
   }, [dispatch, currentUser, selectedConversation]);
 
-  const selectConvo = (conversationId, otherUserId) => {
+  const selectConvo = (conversationId, otherUserId , publicKey) => {
     dispatch(setSelectConv(conversationId));
     dispatch(setMessageUser(otherUserId));
+    dispatch(setPublicKey(publicKey))
+
 
     // Clear the notification count for the selected conversation
     setNotificationCounts((prevCounts) => ({
@@ -163,7 +165,7 @@ function User() {
           <div
             key={convo.conversation_id}
             onClick={() =>
-              selectConvo(convo.conversation_id, convo.other_user?.id)
+              selectConvo(convo.conversation_id, convo.other_user?.id , convo?.encryption_key)
             }
             className="conversation-card"
           >
