@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { post } from "../../api/api";
-import {generateKeys , storePrivateKey} from "../../Encry/rsa"
 
 function Login() {
   const [isSuccess, setIsSuccess] = useState(false);
@@ -31,16 +30,7 @@ try {
         localStorage.setItem("isLoggedIn", true);
         localStorage.setItem("userId" , response.user_id)
 
-        if (!response.publicKey) {
-          const { publicKey, privateKey } = generateKeys();
-          
-          storePrivateKey(privateKey);
 
-          try{await post("/key", { public_key: publicKey });}
-          catch(error){
-            console.log("key error" , error)
-          }
-        }
         window.location.href = '/home';
 
       }
