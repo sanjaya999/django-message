@@ -44,10 +44,12 @@ function Message() {
 
     socketRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("Received message:", data); // Debug incoming messages
+         // Debug incoming messages
         if (data.type === "chat_message") {
           const message = data.message;
-          message.content = simpleDecrypt(message.content, key);
+          console.log("this is before decryption", data.message.content);
+          message.content = message.content, key
+          console.log("this is after decryption ", message.content)
 
           if (message.image && !message.image.startsWith(backendBaseUrl)) {
             message.image = `${backendBaseUrl}${message.image}`;
@@ -166,6 +168,7 @@ const handleSubmit = async (e) => {
   return (
     <div className="chat-container">
       <div className="messages-container">
+        {console.log("usestate message " , messages)}
         {messages.map((message) => {
           const isCurrentUser = message.sender.id.toString() === currentUser;
           
@@ -179,6 +182,7 @@ const handleSubmit = async (e) => {
                 <div>
                   <div className={`message-bubble ${isCurrentUser ? 'message-bubble-right' : 'message-bubble-left'}`}>
                   {message.image && <img src={`${backendBaseUrl}${message.image} `}alt="Message" className="message-image" />}
+                 
                     <p>{simpleDecrypt(message.content , key)}</p>
                     <div className={`timestamp ${isCurrentUser ? 'timestamp-right' : 'timestamp-left'}`}>
                       {formatTime(message.timestamp)}
