@@ -6,6 +6,7 @@ const layoutSlice = createSlice({
         selectedUser : null , 
         selectConv : null , 
         messageUser : null,
+        publicKey : null,
     },
     reducers:{
         setSelectedUser : (state , action)=>{
@@ -18,8 +19,11 @@ const layoutSlice = createSlice({
         setMessageUser: (state, action) => {
             state.messageUser = action.payload;
           },
+        setPublicKey: (state , action) =>{
+            state.publicKey = action.payload
+        }
     }
 })
 
-export const {setSelectedUser, setSelectConv , setMessageUser} = layoutSlice.actions;
+export const {setSelectedUser, setSelectConv , setMessageUser , setPublicKey} = layoutSlice.actions;
 export default layoutSlice.reducer;
