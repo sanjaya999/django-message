@@ -8,7 +8,6 @@ class CustomUser(AbstractUser):
 
     username = None
     email = models.EmailField(unique=True)
-    public_key = models.TextField(blank=True, null=True)
 
   
     USERNAME_FIELD = 'email'
@@ -18,6 +17,7 @@ class conversation(models.Model):
     title = models.CharField(max_length=255 , blank=True , null=True)
     is_group = models.BooleanField(default=False)
     members = models.ManyToManyField(CustomUser , related_name="conversations")
+    encryption_key = models.CharField(max_length=44, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
