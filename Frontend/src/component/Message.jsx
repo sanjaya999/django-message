@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { get, post } from '../api/api';
 import { convertToRelativeTime } from '../functions/time';
 import { useSelector } from 'react-redux';
-import Call from './Call';
 function Message() {
 
   const conversationId = useSelector((state) => state.Layout?.selectConv);
@@ -204,14 +203,10 @@ const handleSubmit = async (e) => {
           <button type="submit" className="send-button">
             Send
           </button>
-          <button type="button" onClick={handleStartCall} className="call-button">
-                        Start Call
-                    </button>
+         
         </form>
       </div>
-      {isCalling && (
-                <Call onEndCall={handleEndCall} />
-            )}
+      
     </div>
   );
 }
