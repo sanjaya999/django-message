@@ -9,7 +9,6 @@ import "./assets/css/Message.css"
 import Layout from "./Layout.jsx";
 import Register from "./component/Login/Register.jsx";
 import Login from "./component/Login/Login.jsx";
-import Cookies from 'js-cookie';
 
 
 
